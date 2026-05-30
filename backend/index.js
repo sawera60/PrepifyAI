@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import connectDB from "./config/db.js";
+import router from "./routes/user.routes.js";
 
 dotenv.config();
 
@@ -15,8 +16,9 @@ app.use(cors({
     origin: "http://localhost:5173",
     credentials: true,
 }));
-
 app.use(cookieParser());
+app.use(express.urlencoded({ extended: true }))
+app.use('/api/auth', router) // POST Api for signin signup
 
 const startServer = async () => {
     try {

@@ -1,1 +1,9 @@
 @import "tailwindcss";
+
+.font-syne {
+    font-family: 'Syne', sans-serif;
+}
+
+.font-dm {
+    font-family: 'DM Sans', sans-serif;
+}

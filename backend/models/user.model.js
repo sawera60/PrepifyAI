@@ -16,18 +16,18 @@ const userSchema = new mongoose.Schema({
     },
     password: {
         type: String,
-        required: true,
+        required: false,
     },
 
     profilePicture: {
         type: String,
         default: "",
     },
-    authProvider:{
-        type:String,
-        enum:["self","google"],
-        default:"self",
-        required:true,
+    authProvider: {
+        type: String,
+        enum: ["self", "google"],
+        default: "self",
+        required: true,
     }
-},{timestamps:true});
+}, { timestamps: true });
 export const User = mongoose.model("User", userSchema)

@@ -29,6 +29,9 @@ const Login = () => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    const handleGoogleLogin = () => {
+        window.location.href = `${serverUrl}/api/auth/google`;
+    };
     return (
         <>
 
@@ -139,6 +142,7 @@ const Login = () => {
                         {/* Submit */}
                         <button
                             type="submit"
+                            onClick={handleGoogleLogin}
                             className="w-full bg-[#6C63FF] hover:bg-[#5B53EE] active:bg-[#4B44DD] text-white font-medium text-sm rounded-lg py-2.5 px-4 transition-all duration-150 flex items-center justify-center gap-2 group"
                         >
                             Sign In

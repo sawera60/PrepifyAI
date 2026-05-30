@@ -39,6 +39,11 @@ const SignUp = () => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    const handleGoogleLogin = () => {
+        window.location.href = `${serverUrl}/api/auth/google`;
+    };
+
+
     return (
         <>
 
@@ -225,6 +230,7 @@ const SignUp = () => {
                         <button
                             type="button"
                             className="w-full flex items-center justify-center gap-2 bg-white text-black font-medium text-sm rounded-lg py-2.5 px-4 transition-all duration-150 hover:bg-gray-100"
+                            onClick={handleGoogleLogin}
                         >
                             <svg
                                 width="16"

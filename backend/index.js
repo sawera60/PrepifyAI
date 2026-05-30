@@ -1,11 +1,13 @@
+import "dotenv/config";
 import express from "express";
-import dotenv from "dotenv";
+import passport from "passport";
+import "./config/passport.js";
+
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import connectDB from "./config/db.js";
 import router from "./routes/user.routes.js";
-
-dotenv.config();
+import session from "express-session";
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -18,7 +20,15 @@ app.use(cors({
 }));
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }))
-app.use('/api/auth', router) // POST Api for signin signup
+app.use(session({ secret: "secretKey", resave: false, saveUninitialized: false, }));
+app.use(passport.initialize());
+app.use(passport.session());
+
+
+// POST Api for signin signup and google auth
+app.use('/api/auth', router)
+
+
 
 const startServer = async () => {
     try {

@@ -142,7 +142,6 @@ const Login = () => {
                         {/* Submit */}
                         <button
                             type="submit"
-                            onClick={handleGoogleLogin}
                             className="w-full bg-[#6C63FF] hover:bg-[#5B53EE] active:bg-[#4B44DD] text-white font-medium text-sm rounded-lg py-2.5 px-4 transition-all duration-150 flex items-center justify-center gap-2 group"
                         >
                             Sign In
@@ -169,6 +168,7 @@ const Login = () => {
                         {/* Google Auth */}
                         <button
                             type="button"
+                            onClick={handleGoogleLogin}
                             className="w-full flex items-center justify-center gap-2 bg-white text-black font-medium text-sm rounded-lg py-2.5 px-4 transition-all duration-150 hover:bg-gray-100"
                         >
                             <svg width="16" height="16" viewBox="0 0 24 24">

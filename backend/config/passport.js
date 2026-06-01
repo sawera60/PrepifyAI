@@ -41,6 +41,7 @@ passport.use(
                         email,
                         password: null,
                         profilePicture: profile.photos[0].value,
+
                     });
                 }
 

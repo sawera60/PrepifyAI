@@ -1,16 +1,36 @@
 const DashboardHeader = () => {
     return (
-        <>
+        <header className="font-dm flex items-center justify-between px-8 py-5 border-b border-white/[0.06]">
+            {/* Left — Greeting */}
+            <h1 className="font-syne text-xl font-bold text-white tracking-tight">
+                Welcome back! 👋
+            </h1>
 
-            <header className="flex justify-between items-center p-6">
-                <h1 className="text-2xl font-bold">
-                    PrepifyAI
-                </h1>
+            {/* Right — Actions */}
+            <div className="flex items-center gap-4">
+                {/* Upgrade Button */}
+                <button className="flex items-center gap-2 bg-gradient-to-r from-[#6C63FF] to-[#5B53EE] hover:from-[#5B53EE] hover:to-[#4B44DD] text-white text-xs font-medium rounded-lg px-4 py-2 transition-all duration-200 shadow-lg shadow-[#6C63FF]/20">
+                    <span>✨</span>
+                    Upgrade to Pro
+                </button>
 
-                <div className="w-10 h-10 rounded-full bg-gray-300" />
-            </header>
-        </>
-    )
+                {/* Notification Bell */}
+                <button className="relative w-9 h-9 rounded-lg bg-[#1A1D2A] border border-white/[0.08] flex items-center justify-center text-[#8B89A0] hover:text-white hover:border-white/[0.15] transition-all duration-150">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                        <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                    </svg>
+                    {/* Notification dot */}
+                    <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#FF6B6B] border-2 border-[#1A1D2A]" />
+                </button>
 
-}
-export default DashboardHeader
+                {/* Avatar */}
+                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#6C63FF] to-[#4ECDC4] flex items-center justify-center text-white text-sm font-bold cursor-pointer ring-2 ring-white/[0.08] hover:ring-[#6C63FF]/40 transition-all duration-200">
+                    U
+                </div>
+            </div>
+        </header>
+    );
+};
+
+export default DashboardHeader;

@@ -4,6 +4,7 @@ import SignUp from "./features/auth/SignUp";
 import Login from "./features/auth/Login";
 import { Routes, Route } from "react-router-dom";
 import Dashboard from "./features/dashboard/Dashboard";
+import InterviewChat from "./features/interview/InterviewChat";
 function App() {
 
 
@@ -14,7 +15,7 @@ function App() {
         <Route path="/" element={<SignUp />} />
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
-
+        <Route path="/interview" element={<InterviewChat />} />
       </Routes>
     </>
 

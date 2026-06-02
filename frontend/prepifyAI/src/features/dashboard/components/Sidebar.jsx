@@ -1,0 +1,142 @@
+import { useNavigate, useLocation } from "react-router-dom";
+import logo from "../../../assets/logo.png";
+
+const navItems = [
+    { label: "Dashboard", icon: "grid", path: "/dashboard" },
+    { label: "My Interviews", icon: "clipboard", path: "/my-interviews" },
+    { label: "Mock Interviews", icon: "mic", path: "/mock-interviews" },
+    { label: "Generate Interview", icon: "plus", path: "/generate-interview" },
+    { label: "Resume Analyzer", icon: "file", path: "/resume-analyzer" },
+    { label: "Payment & Plans", icon: "credit-card", path: "/payment" },
+    { label: "Settings", icon: "settings", path: "/settings" },
+];
+
+const iconMap = {
+    grid: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="3" width="7" height="7" rx="1.5" />
+            <rect x="14" y="3" width="7" height="7" rx="1.5" />
+            <rect x="3" y="14" width="7" height="7" rx="1.5" />
+            <rect x="14" y="14" width="7" height="7" rx="1.5" />
+        </svg>
+    ),
+    clipboard: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+            <rect x="8" y="2" width="8" height="4" rx="1" />
+        </svg>
+    ),
+    mic: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="9" y="2" width="6" height="11" rx="3" />
+            <path d="M19 10v1a7 7 0 0 1-14 0v-1" />
+            <line x1="12" y1="19" x2="12" y2="22" />
+        </svg>
+    ),
+    plus: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
+    ),
+    file: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+            <line x1="16" y1="13" x2="8" y2="13" />
+            <line x1="16" y1="17" x2="8" y2="17" />
+        </svg>
+    ),
+    "credit-card": (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="1" y="4" width="22" height="16" rx="2" />
+            <line x1="1" y1="10" x2="23" y2="10" />
+        </svg>
+    ),
+    settings: (
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="3" />
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+        </svg>
+    ),
+};
+
+const Sidebar = () => {
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    return (
+        <aside className="font-dm w-[260px] min-h-screen bg-[#13151F] border-r border-white/[0.06] flex flex-col fixed left-0 top-0 z-40">
+            {/* Logo */}
+            <div className="flex items-center gap-2.5 px-6 py-6">
+                <div className="w-8 h-8 bg-[#6C63FF] rounded-lg flex items-center justify-center flex-shrink-0">
+                    <img src={logo} alt="logo" className="w-5 h-5" />
+                </div>
+                <span className="font-syne text-[16px] font-bold tracking-tight text-white">
+                    Prepify<span className="text-[#6C63FF]">AI</span>
+                </span>
+            </div>
+
+            {/* Nav */}
+            <nav className="flex-1 px-3 mt-2">
+                <ul className="space-y-1">
+                    {navItems.map((item) => {
+                        const isActive = location.pathname === item.path ||
+                            (item.path === "/dashboard" && location.pathname === "/dashboard");
+                        return (
+                            <li key={item.path}>
+                                <button
+                                    onClick={() => navigate(item.path)}
+                                    className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer
+                                        ${isActive
+                                            ? "bg-[#6C63FF] text-white shadow-lg shadow-[#6C63FF]/20"
+                                            : "text-[#8B89A0] hover:text-white hover:bg-white/[0.04]"
+                                        }`}
+                                >
+                                    <span className={isActive ? "text-white" : "text-[#5A5870]"}>
+                                        {iconMap[item.icon]}
+                                    </span>
+                                    {item.label}
+                                </button>
+                            </li>
+                        );
+                    })}
+                </ul>
+            </nav>
+
+            {/* Upgrade CTA */}
+            <div className="px-4 mb-4">
+                <div className="bg-gradient-to-br from-[#6C63FF]/15 to-[#4ECDC4]/10 border border-white/[0.06] rounded-xl p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                        <span className="text-lg">💎</span>
+                        <span className="text-white text-sm font-semibold">Upgrade to Pro</span>
+                    </div>
+                    <p className="text-[#8B89A0] text-xs leading-relaxed mb-3">
+                        Unlock unlimited interviews, AI feedback, resume analysis and more.
+                    </p>
+                    <button className="w-full bg-[#6C63FF] hover:bg-[#5B53EE] text-white text-xs font-medium rounded-lg py-2 transition-all duration-150">
+                        Upgrade Now
+                    </button>
+                </div>
+            </div>
+
+            {/* User Profile */}
+            <div className="px-4 pb-5 border-t border-white/[0.06] pt-4">
+                <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#6C63FF] to-[#4ECDC4] flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                        U
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <p className="text-white text-sm font-medium truncate">User</p>
+                        <p className="text-[#5A5870] text-xs">Free Plan</p>
+                    </div>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5A5870" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                </div>
+            </div>
+        </aside>
+    );
+};
+
+export default Sidebar;

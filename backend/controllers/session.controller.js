@@ -1,35 +1,80 @@
 import Session from "../models/session.model.js";
 import promptBuilder from "../utils/promptBuilder.js";
-import { getOpenAIResponse } from "../services/openai.js";
+import { getAIResponse } from "../services/openrouter.js";
+
+// POST /api/sessions/start
+export const startSession = async (req, res) => {
+    try {
+        const { userId, interviewId } = req.body;
+
+        const sessionUserId =
+            userId || req.user?._id || "64b5f8c9b2f3a4e5d6c7b8a9";
+
+        const sessionInterviewId =
+            interviewId || "64b5f8c9b2f3a4e5d6c7b8aa";
+
+        const session = new Session({
+            userId: sessionUserId,
+            interviewId: sessionInterviewId,
+            status: "active",
+            transcript: [],
+        });
+
+        await session.save();
+
+        return res.status(201).json({
+            message: "Session created successfully",
+            sessionId: session._id,
+        });
+
+    } catch (error) {
+        console.log("Error in startSession:", error.message);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+};
 
 // POST /api/sessions/:id/message
-export const sessionController = async (req, res) => {
+
+export const addMessageToSession = async (req, res) => {
     try {
         const sessionId = req.params.id;
         const { message } = req.body;
 
         // 1. Get session
         const session = await Session.findById(sessionId);
+
         if (!session) {
             return res.status(404).json({ message: "Session not found" });
         }
 
-        // 2. Add user message to transcript
+        if (session.status === "completed") {
+            return res.status(400).json({
+                message: "Cannot send message to completed session",
+            });
+        }
+
+        // 2. Save user message
         session.transcript.push({
             role: "user",
             content: message,
         });
 
-        // 3. Build messages for OpenAI
+        // 3. Convert transcript to plain format
+        const plainTranscript = session.transcript.map((msg) => ({
+            role: msg.role,
+            content: msg.content,
+        }));
+
+        // 4. Build AI messages
         const messages = promptBuilder({
             interview: session.interviewId,
-            transcript: session.transcript,
+            transcript: plainTranscript,
         });
 
-        // 4. Get AI response
-        const aiReply = await getOpenAIResponse(messages);
+        // 5. Get AI response (OPENROUTER)
+        const aiReply = await getAIResponse(messages);
 
-        // 5. Save AI response
+        // 6. Save AI message
         session.transcript.push({
             role: "assistant",
             content: aiReply,
@@ -37,13 +82,44 @@ export const sessionController = async (req, res) => {
 
         await session.save();
 
-        // 6. Send response
+        // 7. Send response
         return res.status(200).json({
             reply: aiReply,
         });
 
     } catch (error) {
-        console.log(error.message);
+        console.error("Error in addMessageToSession:", error.stack || error);
+        return res.status(500).json({
+            message: "Internal server error",
+            error: error.message,
+        });
+    }
+};
+
+
+
+// PATCH /api/sessions/:id/end
+
+export const endSession = async (req, res) => {
+    try {
+        const sessionId = req.params.id;
+
+        const session = await Session.findById(sessionId);
+
+        if (!session) {
+            return res.status(404).json({ message: "Session not found" });
+        }
+
+        session.status = "completed";
+
+        await session.save();
+
+        return res.status(200).json({
+            message: "Session completed successfully",
+        });
+
+    } catch (error) {
+        console.log("Error in endSession:", error.message);
         return res.status(500).json({ message: "Internal server error" });
     }
 };

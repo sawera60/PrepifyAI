@@ -23,6 +23,20 @@ const interviewSchema = new mongoose.Schema(
             enum: ["Easy", "Medium", "Hard"],
             default: "Easy",
         },
+        experinece: {
+            type: String,
+            enum: ["Junior", "Mid", "Senior"]
+        },
+        techStack: [
+            {
+                type: String,
+
+            }
+        ],
+        generatedFrom: {
+            type: String,
+            enum: ["mock", "custom", "resume"]
+        },
 
         questions: [
             {

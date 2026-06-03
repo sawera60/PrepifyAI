@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import axios from "axios";
+import api from "../../services/api";
 
 const useInterviewStore = create((set) => ({ //set is used when we want to update store
 
@@ -11,9 +11,7 @@ const useInterviewStore = create((set) => ({ //set is used when we want to updat
         try {
             set({ loading: true }); // same as setLoading(true)
 
-            const res = await axios.get(
-                "http://localhost:5000/api/interviews/mock"
-            ); // backend runs Interview.find({ isPublic: true })
+            const res = await api.get("/interviews/mock"); // backend runs Interview.find({ isPublic: true })
 
             // Update store with API response
             set({

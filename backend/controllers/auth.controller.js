@@ -1,6 +1,7 @@
-import { generateToken } from "../config/token.js";
+import { generateAccessToken, generateRefreshToken } from "../config/token.js";
 import { User } from "../models/user.model.js";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 // SIGNUP
 export const signUp = async (req, res) => {
@@ -34,12 +35,20 @@ export const signUp = async (req, res) => {
         });
 
         // Generate token
-        const token = generateToken(user._id);
+        const accessToken = generateAccessToken(user._id);
+        const refreshToken = generateRefreshToken(user._id);
 
         // Set cookie
-        res.cookie("jwt", token, {
+        res.cookie("accessToken", accessToken, {
             httpOnly: true,
-            secure: false,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 15 * 60 * 1000,
+        });
+        
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
             sameSite: "strict",
             maxAge: 7 * 24 * 60 * 60 * 1000,
         });
@@ -81,11 +90,19 @@ export const signIn = async (req, res) => {
         if (!isPasswordMatch) {
             return res.status(400).json({ message: "Invalid credentials" });
         }
-        const token = generateToken(findUser._id);
+        const accessToken = generateAccessToken(findUser._id);
+        const refreshToken = generateRefreshToken(findUser._id);
 
-        res.cookie("jwt", token, {
+        res.cookie("accessToken", accessToken, {
             httpOnly: true,
-            secure: false,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 15 * 60 * 1000,
+        });
+        
+        res.cookie("refreshToken", refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
             sameSite: "strict",
             maxAge: 7 * 24 * 60 * 60 * 1000,
         });
@@ -108,3 +125,37 @@ export const signIn = async (req, res) => {
     }
 };
 
+
+export const refreshToken = async (req, res) => {
+    try {
+        const token = req.cookies?.refreshToken;
+        if (!token) return res.status(401).json({ message: "No refresh token provided" });
+
+        const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET_KEY || process.env.JWT_SECRET_KEY);
+        if (!decoded || !decoded.userId) return res.status(401).json({ message: "Invalid refresh token" });
+
+        const newAccessToken = generateAccessToken(decoded.userId);
+
+        res.cookie("accessToken", newAccessToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+            maxAge: 15 * 60 * 1000,
+        });
+
+        return res.status(200).json({ message: "Token refreshed successfully" });
+    } catch (error) {
+        return res.status(401).json({ message: "Invalid refresh token" });
+    }
+};
+
+export const logout = async (req, res) => {
+    try {
+        res.clearCookie("accessToken");
+        res.clearCookie("refreshToken");
+        res.clearCookie("jwt"); 
+        return res.status(200).json({ message: "Logged out successfully" });
+    } catch (error) {
+        return res.status(500).json({ message: "Error logging out" });
+    }
+};

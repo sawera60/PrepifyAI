@@ -5,19 +5,35 @@ import { getAIResponse } from "../services/openrouter.js";
 // POST /api/sessions/start
 export const startSession = async (req, res) => {
     try {
-        const { userId, interviewId } = req.body;
+        const { interviewId } = req.body;
 
-        const sessionUserId =
-            userId || req.user?._id || "64b5f8c9b2f3a4e5d6c7b8a9";
-
-        const sessionInterviewId =
-            interviewId || "64b5f8c9b2f3a4e5d6c7b8aa";
+        if (!interviewId) {
+            return res.status(400).json({ message: "interviewId is required" });
+        }
 
         const session = new Session({
-            userId: sessionUserId,
-            interviewId: sessionInterviewId,
+            userId: req.user._id,
+            interviewId: interviewId,
             status: "active",
             transcript: [],
+        });
+
+        await session.save();
+        await session.populate("interviewId");
+
+        // Build messages to get first AI response
+        const messages = promptBuilder({
+            interview: session.interviewId,
+            transcript: [],
+        });
+
+        // Get AI response
+        const aiReply = await getAIResponse(messages);
+
+        // Save AI message to transcript
+        session.transcript.push({
+            role: "assistant",
+            content: aiReply,
         });
 
         await session.save();
@@ -25,6 +41,7 @@ export const startSession = async (req, res) => {
         return res.status(201).json({
             message: "Session created successfully",
             sessionId: session._id,
+            firstMessage: aiReply,
         });
 
     } catch (error) {
@@ -41,7 +58,7 @@ export const addMessageToSession = async (req, res) => {
         const { message } = req.body;
 
         // 1. Get session
-        const session = await Session.findById(sessionId);
+        const session = await Session.findById(sessionId).populate("interviewId");
 
         if (!session) {
             return res.status(404).json({ message: "Session not found" });

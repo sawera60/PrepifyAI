@@ -4,9 +4,9 @@ import logo from "../../../assets/logo.png";
 const navItems = [
     { label: "Dashboard", icon: "grid", path: "/dashboard" },
     { label: "My Interviews", icon: "clipboard", path: "/my-interviews" },
-    { label: "Mock Interviews", icon: "mic", path: "/mock-interviews" },
-    { label: "Generate Interview", icon: "plus", path: "/generate-interview" },
-    { label: "Resume Analyzer", icon: "file", path: "/resume-analyzer" },
+    { label: "Mock Interviews", icon: "mic", path: "/mock" },
+    { label: "Generate Interview", icon: "plus", path: "/generateinterview" },
+    { label: "Resume Analyzer", icon: "file", path: "/resumeanalyzer" },
     { label: "Payment & Plans", icon: "credit-card", path: "/payment" },
     { label: "Settings", icon: "settings", path: "/settings" },
 ];
@@ -66,15 +66,15 @@ const Sidebar = () => {
     const location = useLocation();
 
     return (
-        <aside className="font-dm w-[260px] min-h-screen bg-[#13151F] border-r border-white/[0.06] flex flex-col fixed left-0 top-0 z-40">
+        <aside className="font-dm w-[240px] min-h-screen bg-[#13151F] border-r border-white/[0.06] flex flex-col fixed left-0 top-0 z-40">
+
             {/* Logo */}
-            <div className="flex items-center gap-2.5 px-6 py-6">
-                <div className="w-8 h-8 bg-[#6C63FF] rounded-lg flex items-center justify-center flex-shrink-0">
-                    <img src={logo} alt="logo" className="w-5 h-5" />
-                </div>
-                <span className="font-syne text-[16px] font-bold tracking-tight text-white">
-                    Prepify<span className="text-[#6C63FF]">AI</span>
-                </span>
+            <div className="px-4 py-2  flex items-center">
+                <img
+                    src={logo}
+                    alt="PrepifyAI Logo"
+                    className="w-26 h-auto object-contain"
+                />
             </div>
 
             {/* Nav */}
@@ -87,7 +87,7 @@ const Sidebar = () => {
                             <li key={item.path}>
                                 <button
                                     onClick={() => navigate(item.path)}
-                                    className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer
+                                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer
                                         ${isActive
                                             ? "bg-[#6C63FF] text-white shadow-lg shadow-[#6C63FF]/20"
                                             : "text-[#8B89A0] hover:text-white hover:bg-white/[0.04]"
@@ -105,7 +105,7 @@ const Sidebar = () => {
             </nav>
 
             {/* Upgrade CTA */}
-            <div className="px-4 mb-4">
+            {/* <div className="px-4 mb-4">
                 <div className="bg-gradient-to-br from-[#6C63FF]/15 to-[#4ECDC4]/10 border border-white/[0.06] rounded-xl p-4">
                     <div className="flex items-center gap-2 mb-2">
                         <span className="text-lg">💎</span>
@@ -118,12 +118,12 @@ const Sidebar = () => {
                         Upgrade Now
                     </button>
                 </div>
-            </div>
+            </div> */}
 
             {/* User Profile */}
             <div className="px-4 pb-5 border-t border-white/[0.06] pt-4">
                 <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#6C63FF] to-[#4ECDC4] flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#6C63FF] to-[#4ECDC4] flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
                         U
                     </div>
                     <div className="flex-1 min-w-0">

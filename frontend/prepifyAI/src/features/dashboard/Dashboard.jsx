@@ -19,10 +19,10 @@ const Dashboard = () => {
             <Sidebar />
 
             {/* Main Content */}
-            <div className="flex-1 ml-[260px] min-h-screen">
+            <div className="flex-1 ml-[240px] min-h-screen">
                 <DashboardHeader />
 
-                <main className="max-w-[1200px] mx-auto px-8">
+                <main className="max-w-[1550px] mx-auto px-6">
                     <Herosection />
                     <MyInterview />
 

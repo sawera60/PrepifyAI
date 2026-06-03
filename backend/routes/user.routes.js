@@ -1,7 +1,7 @@
 import express from "express";
 import passport from "passport";
-import { signIn, signUp } from "../controllers/auth.controller.js";
-import { generateToken } from "../config/token.js";
+import { signIn, signUp, refreshToken, logout } from "../controllers/auth.controller.js";
+import { generateAccessToken, generateRefreshToken } from "../config/token.js";
 
 
 const router = express.Router();
@@ -9,6 +9,8 @@ const router = express.Router();
 //Auth   // This handles:
 router.post("/signup", signUp);  //POST /api/auth/signup 
 router.post("/signin", signIn); //POST /api/auth/signin
+router.post("/refresh", refreshToken);
+router.post("/logout", logout);
 
 //Google Auth 
 // Step 1: Redirect to Google
@@ -28,14 +30,28 @@ router.get(
     }),
     (req, res) => {
         // req.user comes from Passport strategy
-        const token = generateToken(req.user._id);
+        const accessToken = generateAccessToken(req.user._id);
+        const refreshTokenValue = generateRefreshToken(req.user._id);
 
-        res.cookie("jwt", token, {
+        res.cookie("accessToken", accessToken, {
             httpOnly: true,
-            secure: false,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            maxAge: 15 * 60 * 1000,
+        });
+
+        res.cookie("refreshToken", refreshTokenValue, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
             sameSite: "lax",
             maxAge: 7 * 24 * 60 * 60 * 1000,
         });
+
+        if (req.session) {
+            req.session.destroy((err) => {
+                if (err) console.error("Error destroying session:", err);
+            });
+        }
 
         res.redirect("http://localhost:5173/dashboard");
     }

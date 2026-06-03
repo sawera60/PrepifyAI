@@ -22,23 +22,23 @@ const InterviewCard = ({ interview }) => {
 
     return (
         <div
-            className="font-dm group bg-[#13151F] border border-white/[0.06] hover:border-[#6C63FF]/30 rounded-2xl p-5 transition-all duration-200 cursor-pointer hover:shadow-lg hover:shadow-[#6C63FF]/5"
-            onClick={() => navigate("/interview")}
+            className="font-dm group bg-[#13151F] border border-white/[0.06] hover:border-[#6C63FF]/30 rounded-2xl p-6 min-h-[160px] flex flex-col justify-between transition-all duration-200 cursor-pointer hover:shadow-lg hover:shadow-[#6C63FF]/5"
+            onClick={() => navigate(`/interview/${interview._id}`)}
         >
             <div className="flex items-start gap-4 mb-4">
                 {/* Category Icon */}
                 <div className={`w-11 h-11 rounded-xl ${category.bg} flex items-center justify-center flex-shrink-0`}>
-                    <span className={`text-base font-bold ${category.color}`}>
+                    <span className={`text-lg font-bold ${category.color}`}>
                         {category.icon}
                     </span>
                 </div>
 
                 {/* Title + Difficulty */}
                 <div className="flex-1 min-w-0">
-                    <h3 className="text-white font-semibold text-sm mb-1.5 leading-snug">
+                    <h3 className="text-white font-semibold text-base mb-1.5 leading-snug">
                         {interview.title}
                     </h3>
-                    <span className={`inline-block text-[10px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full ${difficulty.bg} ${difficulty.text}`}>
+                    <span className={`inline-block text-xs font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full ${difficulty.bg} ${difficulty.text}`}>
                         {interview.difficulty}
                     </span>
                 </div>
@@ -46,7 +46,7 @@ const InterviewCard = ({ interview }) => {
 
             {/* Footer */}
             <div className="flex items-center justify-between pt-3 border-t border-white/[0.04]">
-                <div className="flex items-center gap-4 text-[#5A5870] text-xs">
+                <div className="flex items-center gap-4 text-[#5A5870] text-sm">
                     <span className="flex items-center gap-1.5">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />

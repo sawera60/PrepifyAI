@@ -59,17 +59,6 @@ const seedInterviews = async () => {
                     "How would you scale Instagram?",
                 ],
             },
-            {
-                title: "HR Interview",
-                category: "HR",
-                type: "mock",
-                difficulty: "Easy",
-                isPublic: true,
-                questions: [
-                    "Why should we hire you?",
-                    "Where do you see yourself in 5 years?",
-                ],
-            },
         ];
 
         // 4. Insert into DB

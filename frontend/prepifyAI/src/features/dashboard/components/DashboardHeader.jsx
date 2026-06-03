@@ -1,16 +1,16 @@
 const DashboardHeader = () => {
     return (
-        <header className="font-dm flex items-center justify-between px-8 py-5 border-b border-white/[0.06]">
+        <header className="font-dm flex items-center justify-between px-6 py-3 border-b border-white/[0.06]">
             {/* Left — Greeting */}
             <h1 className="font-syne text-xl font-bold text-white tracking-tight">
                 Welcome back! 👋
             </h1>
 
             {/* Right — Actions */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4"> 
                 {/* Upgrade Button */}
-                <button className="flex items-center gap-2 bg-gradient-to-r from-[#6C63FF] to-[#5B53EE] hover:from-[#5B53EE] hover:to-[#4B44DD] text-white text-xs font-medium rounded-lg px-4 py-2 transition-all duration-200 shadow-lg shadow-[#6C63FF]/20">
-                    <span>✨</span>
+                <button className="flex items-center gap-2 bg-gradient-to-r from-[#6C63FF] to-[#5B53EE] hover:from-[#5B53EE] hover:to-[#4B44DD] text-white text-sm font-medium rounded-lg px-4 py-2 transition-all duration-200 shadow-lg shadow-[#6C63FF]/20">
+                    <span>👑</span>
                     Upgrade to Pro
                 </button>
 
@@ -25,7 +25,7 @@ const DashboardHeader = () => {
                 </button>
 
                 {/* Avatar */}
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#6C63FF] to-[#4ECDC4] flex items-center justify-center text-white text-sm font-bold cursor-pointer ring-2 ring-white/[0.08] hover:ring-[#6C63FF]/40 transition-all duration-200">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#6C63FF] to-[#4ECDC4] flex items-center justify-center text-white text-sm font-bold cursor-pointer ring-2 ring-white/[0.08] hover:ring-[#6C63FF]/40 transition-all duration-200">
                     U
                 </div>
             </div>

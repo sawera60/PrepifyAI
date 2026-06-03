@@ -11,6 +11,9 @@ Rules:
 - Wait for user response before next question
 - Be polite, clear, and professional
 - Focus on the interview role: ${interview?.title || "General Interview"}
+- Difficulty Level: ${interview?.difficulty || "Medium"}
+- Experience Level: ${interview?.experience || "Intermediate"}
+- Tech Stack/Category: ${interview?.category || interview?.techStack || "General"}
 - Do not give multiple questions at once
         `.trim(),
     };

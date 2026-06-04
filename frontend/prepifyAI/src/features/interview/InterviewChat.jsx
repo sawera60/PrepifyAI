@@ -5,11 +5,17 @@ import api from "../../services/api";
 const InterviewChat = () => {
     const { interviewId } = useParams();
     const navigate = useNavigate();
+
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState("");
     const [sessionId, setSessionId] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
+
+
+    // 🎤 VOICE STATES (NEW)
+    const [isRecording, setIsRecording] = useState(false);
+    const [mediaRecorder, setMediaRecorder] = useState(null);
 
     const messagesEndRef = useRef(null);
 
@@ -21,23 +27,33 @@ const InterviewChat = () => {
         scrollToBottom();
     }, [messages, isLoading]);
 
+    // -----------------------------
+    // START SESSION
+    // -----------------------------
     const startSession = async () => {
         try {
             setError("");
             setIsLoading(true);
+
             const res = await api.post(`/sessions/start`, { interviewId });
+
             setSessionId(res.data.sessionId);
+
             if (res.data.firstMessage) {
-                setMessages([{ role: "assistant", content: res.data.firstMessage }]);
+                setMessages([
+                    { role: "assistant", content: res.data.firstMessage }
+                ]);
             }
         } catch (error) {
-            console.error("Error starting session:", error);
-            setError(error.response?.data?.message || "Failed to start session. Please try again.");
+            setError(error.response?.data?.message || "Failed to start session.");
         } finally {
             setIsLoading(false);
         }
     };
 
+    // -----------------------------
+    // TEXT MESSAGE FLOW (UNCHANGED)
+    // -----------------------------
     const sendMessage = async (e) => {
         e.preventDefault();
         if (!input.trim() || !sessionId) return;
@@ -49,94 +65,222 @@ const InterviewChat = () => {
         setError("");
 
         try {
-            const res = await api.post(`/sessions/${sessionId}/message`, { message: userMsg.content });
-            const aiMsg = { role: "assistant", content: res.data.reply };
+            const res = await api.post(
+                `/sessions/${sessionId}/message`,
+                { message: userMsg.content }
+            );
+
+            const aiMsg = {
+                role: "assistant",
+                content: res.data.reply,
+            };
+
             setMessages((prev) => [...prev, aiMsg]);
         } catch (error) {
-            console.error("Error sending message:", error);
-            setError(error.response?.data?.message || "Failed to send message. Please try again.");
+            setError(error.response?.data?.message || "Failed to send message.");
         } finally {
             setIsLoading(false);
         }
     };
 
+    // -----------------------------
+    // 🎤 START RECORDING
+    // -----------------------------
+    const startRecording = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({
+                audio: true,
+            });
+
+            const recorder = new MediaRecorder(stream);
+            const chunks = [];
+
+            recorder.ondataavailable = (e) => {
+                chunks.push(e.data);
+            };
+
+            recorder.onstop = async () => {
+                const blob = new Blob(chunks, { type: "audio/webm" });
+                await sendAudio(blob);
+            };
+
+            recorder.start();
+            setMediaRecorder(recorder);
+            setIsRecording(true);
+
+        } catch (err) {
+            // 🔥 FIXED PART (IMPORTANT)
+            console.error("FULL MIC ERROR:", err);
+
+            setError(`${err.name}: ${err.message}`);
+        }
+    };
+
+    // -----------------------------
+    // ⛔ STOP RECORDING
+    // -----------------------------
+    const stopRecording = () => {
+        if (mediaRecorder) {
+            mediaRecorder.stop();
+            setIsRecording(false);
+        }
+    };
+
+    // -----------------------------
+    // 📡 SEND AUDIO TO BACKEND
+    // -----------------------------
+    const sendAudio = async (blob) => {
+        if (!sessionId) return;
+
+        setIsLoading(true);
+        setError("");
+
+        try {
+            const formData = new FormData();
+            formData.append("audio", blob);
+
+            const res = await api.post(
+                `/sessions/${sessionId}/voice-message`,
+                formData
+            );
+
+            // 💬 show user's transcribed text
+            if (res.data.userText) {
+                setMessages((prev) => [
+                    ...prev,
+                    { role: "user", content: res.data.userText }
+                ]);
+            }
+
+            // 💬 show AI text
+            const aiMsg = {
+                role: "assistant",
+                content: res.data.reply,
+            };
+
+            setMessages((prev) => [...prev, aiMsg]);
+
+            // 🔊 play AI voice
+            if (res.data.audio) {
+                const audio = new Audio(
+                    `data:audio/mp3;base64,${res.data.audio}`
+                );
+                audio.play();
+            }
+
+        } catch (error) {
+            setError(error.response?.data?.message || "Voice message failed.");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // -----------------------------
+    // END SESSION
+    // -----------------------------
     const endSession = async () => {
         if (!sessionId) return;
+
         try {
             setIsLoading(true);
             await api.patch(`/sessions/${sessionId}/end`);
             alert("Interview ended successfully.");
             navigate("/dashboard");
         } catch (error) {
-            console.error("Error ending session:", error);
-            setError(error.response?.data?.message || "Failed to end session.");
+            setError("Failed to end session.");
         } finally {
             setIsLoading(false);
         }
     };
 
+    // -----------------------------
+    // UI
+    // -----------------------------
     return (
         <div className="flex flex-col h-screen max-w-3xl mx-auto p-4 bg-gray-50 text-black">
+
             <header className="mb-4 text-center">
-                <h1 className="text-2xl font-bold text-gray-800">Interview Chat</h1>
+                <h1 className="text-2xl font-bold">Interview Chat</h1>
+
                 {error && (
-                    <div className="mt-4 p-3 bg-red-100 text-red-700 border border-red-400 rounded flex justify-between items-center text-sm">
-                        <span>{error}</span>
-                        <button onClick={() => setError("")} className="font-bold text-lg leading-none hover:text-red-900">&times;</button>
+                    <div className="mt-3 p-2 bg-red-100 text-red-700 rounded">
+                        {error}
                     </div>
                 )}
+
                 {!sessionId ? (
                     <button
                         onClick={startSession}
                         disabled={isLoading}
-                        className="mt-2 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+                        className="mt-2 px-4 py-2 bg-blue-600 text-white rounded"
                     >
-                        {isLoading ? "Starting..." : "Start Interview"}
+                        Start Interview
                     </button>
                 ) : (
                     <button
                         onClick={endSession}
-                        disabled={isLoading}
-                        className="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 disabled:opacity-50"
+                        className="mt-2 px-4 py-2 bg-red-600 text-white rounded"
                     >
                         End Interview
                     </button>
                 )}
             </header>
 
-            <div className="flex-1 overflow-y-auto mb-4 border rounded p-4 bg-white shadow-sm flex flex-col gap-3">
-                {messages.length === 0 && sessionId && (
-                    <p className="text-center text-gray-500 mt-10">Session started. Waiting for interviewer...</p>
-                )}
+            {/* CHAT BOX */}
+            <div className="flex-1 overflow-y-auto p-4 bg-white border rounded flex flex-col gap-3">
+
                 {messages.map((msg, idx) => (
-                    <div key={idx} className={`max-w-[80%] rounded p-3 ${msg.role === 'user' ? 'bg-blue-100 self-end text-blue-900' : 'bg-gray-100 self-start text-gray-800'}`}>
-                        <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+                    <div
+                        key={idx}
+                        className={`max-w-[80%] p-3 rounded ${msg.role === "user"
+                            ? "bg-blue-100 self-end"
+                            : "bg-gray-100 self-start"
+                            }`}
+                    >
+                        {msg.content}
                     </div>
                 ))}
-                {isLoading && messages.length > 0 && (
-                    <div className="bg-gray-100 self-start text-gray-800 max-w-[80%] rounded p-3 italic text-sm">
+
+                {isLoading && (
+                    <div className="text-gray-500 italic">
                         AI is thinking...
                     </div>
                 )}
+
                 <div ref={messagesEndRef} />
             </div>
 
-            <form onSubmit={sendMessage} className="flex gap-2">
+            {/* INPUT + VOICE CONTROLS */}
+            <form onSubmit={sendMessage} className="flex gap-2 mt-3">
+
                 <input
-                    type="text"
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     disabled={!sessionId || isLoading}
+                    className="flex-1 border p-2 rounded"
                     placeholder="Type your answer..."
-                    className="flex-1 border rounded px-3 py-2 focus:outline-none focus:border-blue-500 bg-white"
                 />
+
+                {/* TEXT SEND */}
                 <button
                     type="submit"
-                    disabled={!sessionId || isLoading || !input.trim()}
-                    className="px-6 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+                    disabled={!input.trim() || isLoading}
+                    className="px-4 bg-blue-600 text-white rounded"
                 >
                     Send
                 </button>
+
+                {/* 🎤 MIC BUTTON */}
+                <button
+                    type="button"
+                    onClick={isRecording ? stopRecording : startRecording}
+                    className={`px-4 rounded text-white ${isRecording ? "bg-red-600" : "bg-green-600"
+                        }`}
+                    disabled={!sessionId}
+                >
+                    {isRecording ? "Stop 🎙️" : "Speak 🎤"}
+                </button>
+
             </form>
         </div>
     );

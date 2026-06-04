@@ -1,6 +1,8 @@
 import Session from "../models/session.model.js";
 import promptBuilder from "../utils/promptBuilder.js";
 import { getAIResponse } from "../services/openrouter.js";
+import { transcribeAudio } from "../services/deepgram.js";
+import { textToSpeech } from "../services/elevenlabs.js";
 
 // POST /api/sessions/start
 export const startSession = async (req, res) => {
@@ -138,5 +140,79 @@ export const endSession = async (req, res) => {
     } catch (error) {
         console.log("Error in endSession:", error.message);
         return res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+
+export const voiceMessageToSession = async (req, res) => {
+    try {
+        const sessionId = req.params.id;
+
+        // 1. Get session
+        const session = await Session.findById(sessionId).populate("interviewId");
+
+        if (!session) {
+            return res.status(404).json({ message: "Session not found" });
+        }
+
+        if (session.status === "completed") {
+            return res.status(400).json({
+                message: "Cannot send message to completed session",
+            });
+        }
+
+        // 2. Audio buffer from multer
+        const audioBuffer = req.file.buffer;
+
+        // 3. Speech → Text (Deepgram)
+        const userText = await transcribeAudio(audioBuffer);
+
+        if (!userText) {
+            return res.status(400).json({ message: "Could not transcribe audio" });
+        }
+
+        // 4. Save user message
+        session.transcript.push({
+            role: "user",
+            content: userText,
+        });
+
+        // 5. Build prompt (same as text flow)
+        const plainTranscript = session.transcript.map((msg) => ({
+            role: msg.role,
+            content: msg.content,
+        }));
+
+        const messages = promptBuilder({
+            interview: session.interviewId,
+            transcript: plainTranscript,
+        });
+
+        // 6. AI response
+        const aiReply = await getAIResponse(messages);
+
+        // 7. Save AI message
+        session.transcript.push({
+            role: "assistant",
+            content: aiReply,
+        });
+
+        // 8. Text → Speech (ElevenLabs)
+        const audioBase64 = await textToSpeech(aiReply);
+
+        await session.save();
+
+        // 9. Response
+        return res.status(200).json({
+            userText: userText,
+            reply: aiReply,
+            audio: audioBase64,
+        });
+
+    } catch (error) {
+        console.error("Error in voiceMessageToSession:", error);
+        return res.status(500).json({
+            message: "Internal server error",
+        });
     }
 };

@@ -1,10 +1,10 @@
 import { DeepgramClient } from "@deepgram/sdk";
 
-const deepgram = new DeepgramClient(process.env.DEEPGRAM_API_KEY);
+const deepgram = new DeepgramClient({ apiKey: process.env.DEEPGRAM_API_KEY });
 
 export const transcribeAudio = async (audioBuffer) => {
     try {
-        const { result, error } = await deepgram.listen.prerecorded.transcribeFile(
+        const result = await deepgram.listen.v1.media.transcribeFile(
             audioBuffer,
             {
                 model: "nova-2",
@@ -12,8 +12,6 @@ export const transcribeAudio = async (audioBuffer) => {
                 language: "en",
             }
         );
-
-        if (error) throw error;
 
         const transcript =
             result?.results?.channels?.[0]?.alternatives?.[0]?.transcript;

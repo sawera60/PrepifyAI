@@ -5,7 +5,7 @@ import api from "../../services/api";
 const InterviewChat = () => {
     const { interviewId } = useParams();
     const navigate = useNavigate();
-
+    //ok
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState("");
     const [sessionId, setSessionId] = useState(null);

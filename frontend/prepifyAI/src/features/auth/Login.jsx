@@ -16,7 +16,7 @@ const Login = () => {
         e.preventDefault();
         try {
             const res = await axios.post(
-                `${serverUrl}/api/auth/login`,
+                `${serverUrl}/api/auth/signin`,
                 formData
             );
             toast.success(res.data.message || "Logged in successfully");

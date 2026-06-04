@@ -76,10 +76,12 @@ const startServer = async () => {
     try {
         await connectDB();
 
-        app.listen(port, '0.0.0.0', () => {
-            console.log(`🚀 Server running on port ${port}`);
-        });
-
+        // Only call app.listen if not running on Vercel
+        if (!process.env.VERCEL) {
+            app.listen(port, '0.0.0.0', () => {
+                console.log(`🚀 Server running on port ${port}`);
+            });
+        }
     } catch (error) {
         console.error("❌ Database connection failed:", error.message);
         process.exit(1);
@@ -87,3 +89,5 @@ const startServer = async () => {
 };
 
 startServer();
+
+export default app;

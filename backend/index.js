@@ -64,6 +64,10 @@ app.use("/api/auth", userRouter);  // POST Api for signin signup and google auth
 app.use("/api/interviews", interviewRouter); //GET Api for mock interview
 app.use("/api/sessions", sessionRouter); //POST Api for sessions
 
+app.get("/", (req, res) => {
+    res.send("PrepifyAI Backend is running!");
+});
+
 
 
 // Server Start

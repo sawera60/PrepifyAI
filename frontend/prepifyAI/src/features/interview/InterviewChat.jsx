@@ -161,11 +161,12 @@ const InterviewChat = () => {
             setMessages((prev) => [...prev, aiMsg]);
 
             // 🔊 play AI voice
+
             if (res.data.audio) {
-                const audio = new Audio(
-                    `data:audio/mp3;base64,${res.data.audio}`
-                );
-                audio.play();
+                const audio = new Audio(`data:audio/mp3;base64,${res.data.audio}`);
+                audio.play().catch(err => setError("Audio play failed: " + err.message));
+            } else {
+                setError("No audio received from server. audio field: " + JSON.stringify(res.data.audio));
             }
 
         } catch (error) {

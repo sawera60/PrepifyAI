@@ -30,7 +30,7 @@ app.use(cookieParser());
 
 app.use(
     cors({
-        origin: true,
+        origin: process.env.CLIENT_URL || "http://localhost:5173",
         credentials: true,
     })
 );
@@ -45,7 +45,8 @@ app.use(
         saveUninitialized: false,
         cookie: {
             httpOnly: true,
-            secure: false, // true only in production (HTTPS)
+            secure: process.env.NODE_ENV === "production",
+            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         },
     })
 );

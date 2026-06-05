@@ -25,7 +25,7 @@ router.get(
 router.get(
     "/google/callback",
     passport.authenticate("google", {
-        failureRedirect: "http://localhost:5173/signin",
+        failureRedirect: process.env.CLIENT_URL ? `${process.env.CLIENT_URL}/signin` : "http://localhost:5173/signin",
         session: false,
     }),
     (req, res) => {
@@ -53,7 +53,7 @@ router.get(
             });
         }
 
-        res.redirect("http://localhost:5173/dashboard");
+        res.redirect(process.env.CLIENT_URL ? `${process.env.CLIENT_URL}/dashboard` : "http://localhost:5173/dashboard");
     }
 );
 

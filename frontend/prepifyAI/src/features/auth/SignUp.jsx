@@ -1,5 +1,5 @@
 import React, { useState, useContext } from "react";
-import axios from "axios";
+import api from "../../services/api";
 import contextApi from "../../context/contextApi.jsx";
 import { toast } from "react-toastify";
 import logo from "../../assets/logo.png"
@@ -18,8 +18,8 @@ const SignUp = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const res = await axios.post(
-                `${serverUrl}/api/auth/signup`,
+            const res = await api.post(
+                `/auth/signup`,
                 formData
             );
             toast.success(res.data.message || "User created successfully");

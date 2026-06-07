@@ -71,10 +71,9 @@ const InterviewChat = () => {
             );
 
             const aiMsg = {
-                role: "assistant",
-                content: res.data.reply,
-            };
-
+                role: "assistent",
+                content: res.data.reply
+            }
             setMessages((prev) => [...prev, aiMsg]);
         } catch (error) {
             setError(error.response?.data?.message || "Failed to send message.");

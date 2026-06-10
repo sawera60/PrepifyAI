@@ -197,8 +197,13 @@ export const voiceMessageToSession = async (req, res) => {
             content: aiReply,
         });
 
-        // 8. Text → Speech (ElevenLabs)
-        const audioBase64 = await textToSpeech(aiReply);
+        // 8. Optionally generate speech, but don't fail if ElevenLabs is unavailable
+        let audioBase64 = null;
+        try {
+            audioBase64 = await textToSpeech(aiReply);
+        } catch (ttsError) {
+            console.warn("Text-to-speech skipped:", ttsError.message);
+        }
 
         await session.save();
 

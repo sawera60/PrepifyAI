@@ -1,4 +1,5 @@
 import React, { useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
 import contextApi from "../../context/contextApi.jsx";
 import { toast } from "react-toastify";
@@ -12,6 +13,7 @@ const SignUp = () => {
         password: "",
         confirmPassword: "",
     });
+    const navigate = useNavigate();
 
     const { serverUrl } = useContext(contextApi);
 
@@ -23,13 +25,7 @@ const SignUp = () => {
                 formData
             );
             toast.success(res.data.message || "User created successfully");
-            setFormData({
-                firstName: "",
-                lastName: "",
-                email: "",
-                password: "",
-                confirmPassword: "",
-            });
+            navigate("/login");
         } catch (error) {
             toast.error(error.response?.data?.message || "Server error");
         }

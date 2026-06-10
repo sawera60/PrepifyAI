@@ -1,4 +1,5 @@
 import React, { useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
 import contextApi from "../../context/contextApi.jsx";
 import { toast } from "react-toastify";
@@ -9,6 +10,7 @@ const Login = () => {
         email: "",
         password: "",
     });
+    const navigate = useNavigate();
 
     const { serverUrl } = useContext(contextApi);
 
@@ -20,6 +22,7 @@ const Login = () => {
                 formData
             );
             toast.success(res.data.message || "Logged in successfully");
+            navigate("/dashboard");
         } catch (error) {
             toast.error(error.response?.data?.message || "Server error");
         }

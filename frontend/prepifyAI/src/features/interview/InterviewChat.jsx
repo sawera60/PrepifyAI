@@ -175,22 +175,21 @@ const InterviewChat = () => {
     };
 
     // -----------------------------
-    // TEST AI VOICE
+    // TEST AI VOICE (LOCAL TTS)
     // -----------------------------
     const testVoice = async () => {
         try {
             setError("");
-            const res = await api.post(`/sessions/${sessionId}/voice-message-test`);
 
-            if (res.data.audio) {
-                const audio = new Audio(`data:audio/mp3;base64,${res.data.audio}`);
-                await audio.play();
-                setError("✅ Audio played successfully!");
-            } else {
-                setError("❌ No audio returned: " + JSON.stringify(res.data));
-            }
+            const text = "Hello! This is a voice test from PrepifyAI.";
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = 1;
+            utterance.pitch = 1;
+            window.speechSynthesis.speak(utterance);
+
+            setError("✅ Audio played successfully!");
         } catch (err) {
-            setError("❌ " + (err.response?.data?.message || err.message));
+            setError("❌ " + (err.message || String(err)));
         }
     };
 

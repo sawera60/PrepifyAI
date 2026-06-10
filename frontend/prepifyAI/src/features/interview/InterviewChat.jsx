@@ -176,6 +176,26 @@ const InterviewChat = () => {
     };
 
     // -----------------------------
+    // TEST AI VOICE
+    // -----------------------------
+    const testVoice = async () => {
+        try {
+            setError("");
+            const res = await api.post(`/sessions/${sessionId}/voice-message-test`);
+
+            if (res.data.audio) {
+                const audio = new Audio(`data:audio/mp3;base64,${res.data.audio}`);
+                await audio.play();
+                setError("✅ Audio played successfully!");
+            } else {
+                setError("❌ No audio returned: " + JSON.stringify(res.data));
+            }
+        } catch (err) {
+            setError("❌ " + (err.response?.data?.message || err.message));
+        }
+    };
+
+    // -----------------------------
     // END SESSION
     // -----------------------------
     const endSession = async () => {
@@ -268,6 +288,16 @@ const InterviewChat = () => {
                     className="px-4 bg-blue-600 text-white rounded"
                 >
                     Send
+                </button>
+
+                {/* TEST VOICE BUTTON */}
+                <button
+                    type="button"
+                    onClick={testVoice}
+                    disabled={!sessionId || isLoading}
+                    className="px-4 rounded bg-indigo-600 text-white"
+                >
+                    Test Voice 🔊
                 </button>
 
                 {/* 🎤 MIC BUTTON */}

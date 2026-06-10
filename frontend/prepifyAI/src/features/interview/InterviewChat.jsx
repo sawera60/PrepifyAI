@@ -159,13 +159,12 @@ const InterviewChat = () => {
 
             setMessages((prev) => [...prev, aiMsg]);
 
-            // 🔊 play AI voice
-
-            if (res.data.audio) {
-                const audio = new Audio(`data:audio/mp3;base64,${res.data.audio}`);
-                audio.play().catch(err => setError("Audio play failed: " + err.message));
-            } else {
-                setError("No audio received from server. audio field: " + JSON.stringify(res.data.audio));
+            // 🔊 play AI voice using Web Speech API
+            if (res.data.reply) {
+                const utterance = new SpeechSynthesisUtterance(res.data.reply);
+                utterance.rate = 1;
+                utterance.pitch = 1;
+                window.speechSynthesis.speak(utterance);
             }
 
         } catch (error) {

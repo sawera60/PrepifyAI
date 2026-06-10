@@ -1,3 +1,5 @@
+
+
 import React, { useState, useRef, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../../services/api";
@@ -5,15 +7,14 @@ import api from "../../services/api";
 const InterviewChat = () => {
     const { interviewId } = useParams();
     const navigate = useNavigate();
-    //ok
+
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState("");
     const [sessionId, setSessionId] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
 
-
-    // 🎤 VOICE STATES (NEW)
+    // 🎤 VOICE STATES
     const [isRecording, setIsRecording] = useState(false);
     const [mediaRecorder, setMediaRecorder] = useState(null);
 
@@ -26,6 +27,28 @@ const InterviewChat = () => {
     useEffect(() => {
         scrollToBottom();
     }, [messages, isLoading]);
+
+    // -----------------------------
+    // 🔊 SPEAK HELPER
+    // -----------------------------
+    const speakText = (text) => {
+        window.speechSynthesis.cancel(); // stop any previous speech
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 1;
+        utterance.pitch = 1;
+        window.speechSynthesis.speak(utterance);
+    };
+
+    // -----------------------------
+    // ✅ INTERVIEW COMPLETE DETECTION
+    // -----------------------------
+    const checkInterviewComplete = (reply) => {
+        if (reply.includes("[INTERVIEW_COMPLETE]")) {
+            const cleanReply = reply.replace("[INTERVIEW_COMPLETE]", "").trim();
+            return { isComplete: true, cleanReply };
+        }
+        return { isComplete: false, cleanReply: reply };
+    };
 
     // -----------------------------
     // START SESSION
@@ -43,6 +66,7 @@ const InterviewChat = () => {
                 setMessages([
                     { role: "assistant", content: res.data.firstMessage }
                 ]);
+                speakText(res.data.firstMessage);
             }
         } catch (error) {
             setError(error.response?.data?.message || "Failed to start session.");
@@ -52,7 +76,7 @@ const InterviewChat = () => {
     };
 
     // -----------------------------
-    // TEXT MESSAGE FLOW (UNCHANGED)
+    // TEXT MESSAGE FLOW
     // -----------------------------
     const sendMessage = async (e) => {
         e.preventDefault();
@@ -70,11 +94,22 @@ const InterviewChat = () => {
                 { message: userMsg.content }
             );
 
-            const aiMsg = {
-                role: "assistent",
-                content: res.data.reply
+            const { isComplete, cleanReply } = checkInterviewComplete(res.data.reply);
+
+            setMessages((prev) => [
+                ...prev,
+                { role: "assistant", content: cleanReply }
+            ]);
+
+            // 🔊 speak the reply
+            speakText(cleanReply);
+
+            if (isComplete) {
+                setTimeout(() => {
+                    endSession();
+                }, 3000);
             }
-            setMessages((prev) => [...prev, aiMsg]);
+
         } catch (error) {
             setError(error.response?.data?.message || "Failed to send message.");
         } finally {
@@ -87,9 +122,7 @@ const InterviewChat = () => {
     // -----------------------------
     const startRecording = async () => {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({
-                audio: true,
-            });
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
             const recorder = new MediaRecorder(stream);
             const chunks = [];
@@ -108,10 +141,7 @@ const InterviewChat = () => {
             setIsRecording(true);
 
         } catch (err) {
-            // 🔥 FIXED PART (IMPORTANT)
-            console.error("FULL MIC ERROR:", err);
-
-            setError(`${err.name}: ${err.message}`);
+            setError("Microphone not available on this device.");
         }
     };
 
@@ -151,20 +181,21 @@ const InterviewChat = () => {
                 ]);
             }
 
-            // 💬 show AI text
-            const aiMsg = {
-                role: "assistant",
-                content: res.data.reply,
-            };
+            const { isComplete, cleanReply } = checkInterviewComplete(res.data.reply);
 
-            setMessages((prev) => [...prev, aiMsg]);
+            // 💬 show AI text (cleaned)
+            setMessages((prev) => [
+                ...prev,
+                { role: "assistant", content: cleanReply }
+            ]);
 
-            // 🔊 play AI voice using Web Speech API
-            if (res.data.reply) {
-                const utterance = new SpeechSynthesisUtterance(res.data.reply);
-                utterance.rate = 1;
-                utterance.pitch = 1;
-                window.speechSynthesis.speak(utterance);
+            // 🔊 speak the reply
+            speakText(cleanReply);
+
+            if (isComplete) {
+                setTimeout(() => {
+                    endSession();
+                }, 3000);
             }
 
         } catch (error) {
@@ -175,22 +206,11 @@ const InterviewChat = () => {
     };
 
     // -----------------------------
-    // TEST AI VOICE (LOCAL TTS)
+    // TEST AI VOICE
     // -----------------------------
-    const testVoice = async () => {
-        try {
-            setError("");
-
-            const text = "Hello! This is a voice test from PrepifyAI.";
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.rate = 1;
-            utterance.pitch = 1;
-            window.speechSynthesis.speak(utterance);
-
-            setError("✅ Audio played successfully!");
-        } catch (err) {
-            setError("❌ " + (err.message || String(err)));
-        }
+    const testVoice = () => {
+        speakText("Hello! This is a voice test from PrepifyAI.");
+        setError("✅ Audio played successfully!");
     };
 
     // -----------------------------
@@ -292,18 +312,16 @@ const InterviewChat = () => {
                 <button
                     type="button"
                     onClick={testVoice}
-                    disabled={!sessionId || isLoading}
                     className="px-4 rounded bg-indigo-600 text-white"
                 >
-                    Test Voice 🔊
+                    Test 🔊
                 </button>
 
                 {/* 🎤 MIC BUTTON */}
                 <button
                     type="button"
                     onClick={isRecording ? stopRecording : startRecording}
-                    className={`px-4 rounded text-white ${isRecording ? "bg-red-600" : "bg-green-600"
-                        }`}
+                    className={`px-4 rounded text-white ${isRecording ? "bg-red-600" : "bg-green-600"}`}
                     disabled={!sessionId}
                 >
                     {isRecording ? "Stop 🎙️" : "Speak 🎤"}

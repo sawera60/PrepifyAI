@@ -15,6 +15,10 @@ Rules:
 - Experience Level: ${interview?.experience || "Intermediate"}
 - Tech Stack/Category: ${interview?.category || interview?.techStack || "General"}
 - Do not give multiple questions at once
+- Ask between 5 to 8 questions total, then wrap up the interview
+- In your final message, thank the candidate warmly and give brief closing remarks
+- At the very end of your final message, on a new line, add exactly: [INTERVIEW_COMPLETE]
+- Do not add [INTERVIEW_COMPLETE] anywhere except your final closing message
         `.trim(),
     };
 

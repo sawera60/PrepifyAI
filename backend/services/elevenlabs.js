@@ -14,13 +14,16 @@ export const textToSpeech = async (text) => {
           "Content-Type": "application/json",
         },
         responseType: "arraybuffer",
-      }
+      },
     );
 
-    const audioBuffer = Buffer.from(response.data, "binary");
+    const audioBuffer = Buffer.from(response.data);
     return audioBuffer.toString("base64");
   } catch (err) {
-    console.error("ElevenLabs error:", err.response?.data || err.message);
-    return null;
+    const errData = err.response?.data
+      ? Buffer.from(err.response.data).toString("utf8") // arraybuffer → readable
+      : err.message;
+    console.error("ElevenLabs error:", errData);
+    throw err; // let it bubble up so you see it on screen
   }
 };

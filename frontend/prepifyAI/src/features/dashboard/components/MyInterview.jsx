@@ -17,7 +17,7 @@ const MyInterview = () => {
                 </button>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
                 {myInterviews && myInterviews.length > 0 ? (
                     <div className="bg-[#13151F] border border-white/[0.06] rounded-2xl p-5 flex flex-col justify-between min-h-[160px]">
                         <h3 className="text-[#8B89A0] font-semibold text-xs uppercase tracking-wider mb-3">Custom Generated</h3>

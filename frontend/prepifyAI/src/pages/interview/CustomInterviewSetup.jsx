@@ -178,16 +178,16 @@ const CustomInterviewSetup = () => {
     <div className="min-h-screen bg-[#0B0D14] font-dm text-white flex flex-col">
 
       {/* Header */}
-      <header className="border-b border-white/[0.08] px-6 py-4 flex items-center gap-3">
-        <div className="w-8 h-8 rounded-full bg-[#6C63FF]/20 flex items-center justify-center text-sm">
+      <header className="border-b border-white/[0.08] px-4 sm:px-6 py-3 sm:py-4 flex items-center gap-3">
+        <div className="w-8 h-8 rounded-full bg-[#6C63FF]/20 flex items-center justify-center text-sm flex-shrink-0">
           🤖
         </div>
-        <div>
-          <h1 className="font-syne font-bold text-base text-white">Custom Interview Setup</h1>
-          <p className="text-xs text-[#8B89A0]">Answer a few questions to personalize your interview</p>
+        <div className="min-w-0 flex-1">
+          <h1 className="font-syne font-bold text-sm sm:text-base text-white truncate">Custom Interview Setup</h1>
+          <p className="text-xs text-[#8B89A0] hidden sm:block">Answer a few questions to personalize your interview</p>
         </div>
         {/* Step indicator */}
-        <div className="ml-auto flex items-center gap-1.5">
+        <div className="ml-auto flex items-center gap-1.5 flex-shrink-0">
           {SETUP_STEPS.map((_, idx) => (
             <div
               key={idx}
@@ -203,7 +203,7 @@ const CustomInterviewSetup = () => {
       </header>
 
       {/* Chat area */}
-      <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-4 max-w-2xl w-full mx-auto">
+      <div className="flex-1 overflow-y-auto p-4 sm:p-6 flex flex-col gap-4 max-w-2xl w-full mx-auto">
         {messages.map((msg, idx) => (
           <div
             key={idx}

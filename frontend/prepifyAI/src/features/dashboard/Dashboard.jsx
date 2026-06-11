@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import useInterviewStore from "../store/interviewStore";
 import Sidebar from "./components/Sidebar";
 import DashboardHeader from "./components/DashboardHeader";
@@ -8,6 +8,7 @@ import MyInterview from "./components/MyInterview";
 
 const Dashboard = () => {
     const { loading, getMockInterviews, getMyInterviews } = useInterviewStore();
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     useEffect(() => {
         getMockInterviews();
@@ -16,14 +17,17 @@ const Dashboard = () => {
 
     return (
         <div className="font-dm min-h-screen bg-[#0B0D14] flex">
-            {/* Sidebar */}
-            <Sidebar />
+            {/* Sidebar — passes mobile state */}
+            <Sidebar
+                mobileOpen={mobileMenuOpen}
+                onClose={() => setMobileMenuOpen(false)}
+            />
 
-            {/* Main Content */}
-            <div className="flex-1 ml-[240px] min-h-screen">
-                <DashboardHeader />
+            {/* Main Content — offset only on lg+ */}
+            <div className="flex-1 min-h-screen lg:ml-[240px]">
+                <DashboardHeader onMenuToggle={() => setMobileMenuOpen(true)} />
 
-                <main className="max-w-[1550px] mx-auto px-6">
+                <main className="max-w-[1550px] mx-auto px-4 sm:px-6">
                     <Herosection />
                     <MyInterview />
 

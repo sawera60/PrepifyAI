@@ -377,10 +377,10 @@ const InterviewChat = () => {
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.rate = 1;
             utterance.pitch = 1;
-            
+
             // Fix garbage collection issue in Chrome by binding it to window
             window.activeUtterance = utterance;
-            
+
             setIsSpeaking(true);
             utterance.onend = () => {
                 setIsSpeaking(false);
@@ -391,7 +391,7 @@ const InterviewChat = () => {
                 setIsSpeaking(false);
                 window.activeUtterance = null;
             };
-            
+
             window.speechSynthesis.speak(utterance);
         }, 100);
     };
@@ -540,66 +540,68 @@ const InterviewChat = () => {
         <div className="min-h-screen bg-[#0B0D14] font-dm text-white flex flex-col">
 
             {/* Top bar */}
-            <header className="flex items-center justify-between px-6 py-4 border-b border-white/[0.06]">
+            <header className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-white/[0.06] flex-wrap gap-2">
                 <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-[#6C63FF]" />
                     <span className="font-syne font-bold text-sm text-white tracking-wide">PrepifyAI</span>
                 </div>
-                {sessionId && (
-                    <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                        <span className="text-xs text-emerald-400 font-medium">Live Session</span>
-                    </div>
-                )}
-                {error && (
-                    <div className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 px-3 py-1.5 rounded-lg max-w-xs truncate">
-                        {error}
-                    </div>
-                )}
+                <div className="flex items-center gap-2 flex-wrap">
+                    {sessionId && (
+                        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                            <span className="text-xs text-emerald-400 font-medium">Live Session</span>
+                        </div>
+                    )}
+                    {error && (
+                        <div className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 px-3 py-1.5 rounded-lg max-w-[180px] sm:max-w-xs truncate">
+                            {error}
+                        </div>
+                    )}
+                </div>
             </header>
 
             {/* Two-panel call area */}
-            <div className="flex flex-col items-center px-6 pt-8 pb-4">
-                <div className="grid grid-cols-2 gap-4 w-full max-w-2xl">
+            <div className="flex flex-col items-center px-4 sm:px-6 pt-6 sm:pt-8 pb-4">
+                <div className="grid grid-cols-2 gap-3 sm:gap-4 w-full max-w-2xl">
 
                     {/* AI Interviewer Panel */}
-                    <div className={`relative bg-[#13151F] border rounded-2xl p-6 flex flex-col items-center gap-4 transition-all duration-300 ${isSpeaking ? "border-[#6C63FF]/60 shadow-[0_0_20px_rgba(108,99,255,0.15)]" : "border-white/[0.08]"}`}>
+                    <div className={`relative bg-[#13151F] border rounded-2xl p-4 sm:p-6 flex flex-col items-center gap-3 sm:gap-4 transition-all duration-300 ${isSpeaking ? "border-[#6C63FF]/60 shadow-[0_0_20px_rgba(108,99,255,0.15)]" : "border-white/[0.08]"}`}>
                         {isSpeaking && (
-                            <div className="absolute top-3 right-3 flex items-center gap-1">
+                            <div className="absolute top-2 sm:top-3 right-2 sm:right-3 flex items-center gap-1">
                                 {[0, 150, 300].map((delay) => (
                                     <div
                                         key={delay}
                                         className="w-1 bg-[#6C63FF] rounded-full animate-bounce"
-                                        style={{ height: "12px", animationDelay: `${delay}ms` }}
+                                        style={{ height: "10px", animationDelay: `${delay}ms` }}
                                     />
                                 ))}
                             </div>
                         )}
-                        <div className={`w-20 h-20 rounded-full overflow-hidden border-2 transition-all duration-300 ${isSpeaking ? "border-[#6C63FF]" : "border-[#6C63FF]/30"}`}>
+                        <div className={`w-14 h-14 sm:w-20 sm:h-20 rounded-full overflow-hidden border-2 transition-all duration-300 ${isSpeaking ? "border-[#6C63FF]" : "border-[#6C63FF]/30"}`}>
                             <img src={aiAvatar} alt="AI Interviewer" className="w-full h-full object-cover" />
                         </div>
                         <div className="text-center">
-                            <p className="font-syne font-bold text-sm text-white">AI Interviewer</p>
-                            <p className="text-xs text-[#8B89A0] mt-0.5">
+                            <p className="font-syne font-bold text-xs sm:text-sm text-white">AI Interviewer</p>
+                            <p className="text-[10px] sm:text-xs text-[#8B89A0] mt-0.5">
                                 {isSpeaking ? "Speaking..." : isLoading ? "Thinking..." : sessionId ? "Listening" : "Ready"}
                             </p>
                         </div>
                     </div>
 
                     {/* User Panel */}
-                    <div className={`relative bg-[#13151F] border rounded-2xl p-6 flex flex-col items-center gap-4 transition-all duration-300 ${isRecording ? "border-red-500/60 shadow-[0_0_20px_rgba(239,68,68,0.15)]" : "border-white/[0.08]"}`}>
+                    <div className={`relative bg-[#13151F] border rounded-2xl p-4 sm:p-6 flex flex-col items-center gap-3 sm:gap-4 transition-all duration-300 ${isRecording ? "border-red-500/60 shadow-[0_0_20px_rgba(239,68,68,0.15)]" : "border-white/[0.08]"}`}>
                         {isRecording && (
-                            <div className="absolute top-3 right-3 flex items-center gap-1.5">
+                            <div className="absolute top-2 sm:top-3 right-2 sm:right-3 flex items-center gap-1.5">
                                 <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-                                <span className="text-xs text-red-400">REC</span>
+                                <span className="text-[10px] sm:text-xs text-red-400">REC</span>
                             </div>
                         )}
-                        <div className={`w-20 h-20 rounded-full overflow-hidden border-2 transition-all duration-300 ${isRecording ? "border-red-500" : "border-white/10"}`}>
+                        <div className={`w-14 h-14 sm:w-20 sm:h-20 rounded-full overflow-hidden border-2 transition-all duration-300 ${isRecording ? "border-red-500" : "border-white/10"}`}>
                             <img src={userAvatar} alt="You" className="w-full h-full object-cover" />
                         </div>
                         <div className="text-center">
-                            <p className="font-syne font-bold text-sm text-white">You</p>
-                            <p className="text-xs text-[#8B89A0] mt-0.5">
+                            <p className="font-syne font-bold text-xs sm:text-sm text-white">You</p>
+                            <p className="text-[10px] sm:text-xs text-[#8B89A0] mt-0.5">
                                 {isRecording ? "Recording..." : "Candidate"}
                             </p>
                         </div>

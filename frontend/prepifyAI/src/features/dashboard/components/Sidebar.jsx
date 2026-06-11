@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import logo from "../../../assets/logo.png";
 
@@ -61,20 +62,29 @@ const iconMap = {
     ),
 };
 
-const Sidebar = () => {
+const Sidebar = ({ mobileOpen, onClose }) => {
     const navigate = useNavigate();
     const location = useLocation();
 
-    return (
-        <aside className="font-dm w-[240px] min-h-screen bg-[#13151F] border-r border-white/[0.06] flex flex-col fixed left-0 top-0 z-40">
+    const handleNav = (path) => {
+        navigate(path);
+        onClose?.(); // close mobile drawer on nav
+    };
 
+    const navContent = (
+        <>
             {/* Logo */}
-            <div className="px-4 py-2  flex items-center">
-                <img
-                    src={logo}
-                    alt="PrepifyAI Logo"
-                    className="w-26 h-auto object-contain"
-                />
+            <div className="px-4 py-2 flex items-center justify-between">
+                <img src={logo} alt="PrepifyAI Logo" className="w-26 h-auto object-contain" />
+                {/* Close button — mobile only */}
+                <button
+                    onClick={onClose}
+                    className="lg:hidden w-7 h-7 flex items-center justify-center text-[#8B89A0] hover:text-white"
+                >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M18 6L6 18M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
 
             {/* Nav */}
@@ -86,7 +96,7 @@ const Sidebar = () => {
                         return (
                             <li key={item.path}>
                                 <button
-                                    onClick={() => navigate(item.path)}
+                                    onClick={() => handleNav(item.path)}
                                     className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer
                                         ${isActive
                                             ? "bg-[#6C63FF] text-white shadow-lg shadow-[#6C63FF]/20"
@@ -104,22 +114,6 @@ const Sidebar = () => {
                 </ul>
             </nav>
 
-            {/* Upgrade CTA */}
-            {/* <div className="px-4 mb-4">
-                <div className="bg-gradient-to-br from-[#6C63FF]/15 to-[#4ECDC4]/10 border border-white/[0.06] rounded-xl p-4">
-                    <div className="flex items-center gap-2 mb-2">
-                        <span className="text-lg">💎</span>
-                        <span className="text-white text-sm font-semibold">Upgrade to Pro</span>
-                    </div>
-                    <p className="text-[#8B89A0] text-xs leading-relaxed mb-3">
-                        Unlock unlimited interviews, AI feedback, resume analysis and more.
-                    </p>
-                    <button className="w-full bg-[#6C63FF] hover:bg-[#5B53EE] text-white text-xs font-medium rounded-lg py-2 transition-all duration-150">
-                        Upgrade Now
-                    </button>
-                </div>
-            </div> */}
-
             {/* User Profile */}
             <div className="px-4 pb-5 border-t border-white/[0.06] pt-4">
                 <div className="flex items-center gap-3">
@@ -135,7 +129,33 @@ const Sidebar = () => {
                     </svg>
                 </div>
             </div>
-        </aside>
+        </>
+    );
+
+    return (
+        <>
+            {/* Desktop Sidebar */}
+            <aside className="font-dm w-[240px] min-h-screen bg-[#13151F] border-r border-white/[0.06] flex-col fixed left-0 top-0 z-40 hidden lg:flex">
+                {navContent}
+            </aside>
+
+            {/* Mobile Overlay */}
+            {mobileOpen && (
+                <div
+                    className="fixed inset-0 z-40 bg-black/60 lg:hidden"
+                    onClick={onClose}
+                />
+            )}
+
+            {/* Mobile Drawer */}
+            <aside
+                className={`font-dm w-[240px] min-h-screen bg-[#13151F] border-r border-white/[0.06] flex flex-col fixed left-0 top-0 z-50 lg:hidden transition-transform duration-300 ${
+                    mobileOpen ? "translate-x-0" : "-translate-x-full"
+                }`}
+            >
+                {navContent}
+            </aside>
+        </>
     );
 };
 

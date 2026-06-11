@@ -120,11 +120,11 @@ const InterviewAnalysis = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#0B0D14] font-dm text-white p-6 md:p-12">
+        <div className="min-h-screen bg-[#0B0D14] font-dm text-white p-4 sm:p-6 md:p-12">
             <div className="max-w-6xl mx-auto">
 
                 {/* Header */}
-                <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-12 border-b border-[#1E2335] pb-8">
+                <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8 sm:mb-12 border-b border-[#1E2335] pb-6 sm:pb-8">
                     <div>
                         <div className="flex items-center gap-3 mb-2">
                             <span className="px-3 py-1 bg-[#6C63FF]/20 text-[#8B5CF6] text-xs font-semibold rounded-full uppercase tracking-wider">
@@ -134,22 +134,22 @@ const InterviewAnalysis = () => {
                                 {interviewId?.category || "General"}
                             </span>
                         </div>
-                        <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight">
+                        <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight">
                             {interviewId?.title || "Mock Interview"} Analysis
                         </h1>
                     </div>
                     <button
                         onClick={() => navigate("/dashboard")}
-                        className="self-start md:self-auto px-5 py-2.5 bg-[#161925] border border-[#2E354F] hover:bg-[#202538] text-gray-200 rounded-xl text-sm font-semibold transition-all flex items-center gap-2"
+                        className="self-start sm:self-auto px-4 py-2 sm:px-5 sm:py-2.5 bg-[#161925] border border-[#2E354F] hover:bg-[#202538] text-gray-200 rounded-xl text-sm font-semibold transition-all flex items-center gap-2"
                     >
                         ← Back to Dashboard
                     </button>
                 </header>
 
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 mb-6 sm:mb-8">
 
                     {/* Overall Performance Score */}
-                    <div className="lg:col-span-4 bg-[#161925] border border-[#23293F] rounded-2xl p-8 flex flex-col items-center justify-center text-center relative overflow-hidden shadow-xl">
+                    <div className="lg:col-span-4 bg-[#161925] border border-[#23293F] rounded-2xl p-6 sm:p-8 flex flex-col items-center justify-center text-center relative overflow-hidden shadow-xl">
                         <div className="absolute -top-10 -left-10 w-40 h-40 bg-[#6C63FF]/5 rounded-full filter blur-2xl" />
 
                         <span className="text-gray-400 text-sm font-semibold uppercase tracking-wider mb-4">
@@ -197,20 +197,20 @@ const InterviewAnalysis = () => {
                     </div>
 
                     {/* Overall Evaluation Feedback */}
-                    <div className="lg:col-span-8 bg-[#161925] border border-[#23293F] rounded-2xl p-8 flex flex-col justify-between shadow-xl">
+                    <div className="lg:col-span-8 bg-[#161925] border border-[#23293F] rounded-2xl p-6 sm:p-8 flex flex-col justify-between shadow-xl">
                         <div>
-                            <h3 className="text-lg font-bold mb-4 text-[#8B5CF6] flex items-center gap-2">
+                            <h3 className="text-base sm:text-lg font-bold mb-4 text-[#8B5CF6] flex items-center gap-2">
                                 💬 Evaluator's Summary
                             </h3>
-                            <p className="text-gray-300 text-base md:text-lg leading-relaxed italic">
+                            <p className="text-gray-300 text-sm sm:text-base md:text-lg leading-relaxed italic">
                                 "{feedback}"
                             </p>
                         </div>
 
-                        <div className="mt-8 pt-6 border-t border-[#23293F]/50 flex flex-wrap gap-4 text-xs text-gray-400">
+                        <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-[#23293F]/50 flex flex-wrap gap-3 sm:gap-4 text-xs text-gray-400">
                             <div>
                                 <span className="font-semibold text-gray-300">Session ID: </span>
-                                <span className="font-mono text-gray-500">{sessionId}</span>
+                                <span className="font-mono text-gray-500 break-all">{sessionId}</span>
                             </div>
                             <div>
                                 <span className="font-semibold text-gray-300">Target Role: </span>
@@ -221,7 +221,7 @@ const InterviewAnalysis = () => {
                 </div>
 
                 {/* Detailed Breakdown & Dimensions */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 mb-6 sm:mb-8">
 
                     {/* Performance Dimensions */}
                     <div className="lg:col-span-6 bg-[#161925] border border-[#23293F] rounded-2xl p-8 shadow-xl">

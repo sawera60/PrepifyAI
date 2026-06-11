@@ -1,7 +1,9 @@
 import { useNavigate } from "react-router-dom";
+import useInterviewStore from "../../store/interviewStore";
 
 const MyInterview = () => {
     const navigate = useNavigate();
+    const { myInterviews } = useInterviewStore();
 
     return (
         <section className="font-dm mt-6">
@@ -16,29 +18,63 @@ const MyInterview = () => {
             </div>
 
             <div className="grid md:grid-cols-2 gap-5">
-                {/* Empty State Card */}
-                <div className="bg-[#13151F] border border-white/[0.06] rounded-2xl p-5 flex items-center gap-6">
-                    {/* Icon */}
-                    <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-[#1A1D2A] border border-white/[0.06] flex items-center justify-center">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5A5870" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                        </svg>
+                {myInterviews && myInterviews.length > 0 ? (
+                    <div className="bg-[#13151F] border border-white/[0.06] rounded-2xl p-5 flex flex-col justify-between min-h-[160px]">
+                        <h3 className="text-[#8B89A0] font-semibold text-xs uppercase tracking-wider mb-3">Custom Generated</h3>
+                        <div className="space-y-3.5 max-h-[160px] overflow-y-auto pr-1">
+                            {myInterviews.map((interview) => (
+                                <div 
+                                    key={interview._id}
+                                    className="group flex items-center justify-between p-2.5 rounded-xl hover:bg-white/[0.02] border border-transparent hover:border-white/[0.04] transition-all cursor-pointer"
+                                    onClick={() => navigate(`/interview/${interview._id}`)}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-8 h-8 rounded-lg bg-[#6C63FF]/15 flex items-center justify-center text-[#9F9BFF] text-sm font-bold">
+                                            💻
+                                        </div>
+                                        <div className="min-w-0">
+                                            <h4 className="text-white font-medium text-sm truncate max-w-[170px]">{interview.title}</h4>
+                                            <p className="text-xs text-[#8B89A0]">{interview.difficulty || "Medium"} • {interview.experience || "Mid"}</p>
+                                        </div>
+                                    </div>
+                                    <button 
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            navigate(`/interview/${interview._id}`);
+                                        }}
+                                        className="bg-[#6C63FF] hover:bg-[#5B53EE] text-white text-xs font-semibold rounded-lg px-3 py-1.5 transition-all flex items-center gap-1"
+                                    >
+                                        Start 🚀
+                                    </button>
+                                </div>
+                            ))}
+                        </div>
                     </div>
+                ) : (
+                    /* Empty State Card */
+                    <div className="bg-[#13151F] border border-white/[0.06] rounded-2xl p-5 flex items-center gap-6">
+                        {/* Icon */}
+                        <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-[#1A1D2A] border border-white/[0.06] flex items-center justify-center">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5A5870" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                            </svg>
+                        </div>
 
-                    {/* Text */}
-                    <div className="flex-1">
-                        <h3 className="text-white font-semibold text-base mb-1">No interviews yet</h3>
-                        <p className="text-[#8B89A0] text-sm leading-relaxed mb-4">
-                            Start your first interview or try some mock interviews below.
-                        </p>
-                        <button
-                            onClick={() => navigate("/interview")}
-                            className="bg-[#6C63FF] hover:bg-[#5B53EE] text-white text-sm font-medium rounded-lg px-4 py-2 transition-all duration-150 shadow-lg shadow-[#6C63FF]/20"
-                        >
-                            Start Your Interview
-                        </button>
+                        {/* Text */}
+                        <div className="flex-1">
+                            <h3 className="text-white font-semibold text-base mb-1">No interviews yet</h3>
+                            <p className="text-[#8B89A0] text-sm leading-relaxed mb-4">
+                                Start your first interview or try some mock interviews below.
+                            </p>
+                            <button
+                                onClick={() => navigate("/interview/custom/setup")}
+                                className="bg-[#6C63FF] hover:bg-[#5B53EE] text-white text-sm font-medium rounded-lg px-4 py-2 transition-all duration-150 shadow-lg shadow-[#6C63FF]/20"
+                            >
+                                Start Your Interview
+                            </button>
+                        </div>
                     </div>
-                </div>
+                )}
 
                 {/* Resume Overview Card */}
                 <div className="bg-[#13151F] border border-white/[0.06] rounded-2xl p-5">

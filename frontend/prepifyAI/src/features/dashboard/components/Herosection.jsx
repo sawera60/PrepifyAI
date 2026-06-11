@@ -33,11 +33,7 @@ const Herosection = () => {
 
                     {/* CTA */}
                     <button
-                        onClick={() => {
-                            // Scroll to mock interviews section instead of navigating to a broken route
-                            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-                            alert("Please select a mock interview from the list below. Custom interviews are coming soon!");
-                        }}
+                        onClick={() => navigate("/interview/custom/setup")}
                         className="group inline-flex items-center gap-2 bg-[#6C63FF] hover:bg-[#5B53EE] active:bg-[#4B44DD] text-white font-medium text-sm rounded-xl px-4 py-2 transition-all duration-200 shadow-lg shadow-[#6C63FF]/25"
                     >
                         Start Your Own Interview

@@ -7,6 +7,7 @@ import {
     endSession,
     voiceMessageToSession,
     testVoiceMessage,
+    getSessionAnalysis,
 } from "../controllers/session.controller.js";
 import { textToSpeech } from "../services/elevenlabs.js";
 
@@ -17,6 +18,9 @@ const upload = multer();
 
 // Protect all routes
 sessionRouter.use(verifyJWT);
+
+// GET /api/sessions/:id/analysis
+sessionRouter.get("/:id/analysis", getSessionAnalysis);
 
 // POST /api/sessions/start
 sessionRouter.post("/start", startSession);

@@ -7,11 +7,12 @@ import MockInterviewList from "./components/MockInterviewList";
 import MyInterview from "./components/MyInterview";
 
 const Dashboard = () => {
-    const { loading, getMockInterviews } = useInterviewStore();
+    const { loading, getMockInterviews, getMyInterviews } = useInterviewStore();
 
     useEffect(() => {
         getMockInterviews();
-    }, [getMockInterviews]);
+        getMyInterviews();
+    }, [getMockInterviews, getMyInterviews]);
 
     return (
         <div className="font-dm min-h-screen bg-[#0B0D14] flex">

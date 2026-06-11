@@ -35,6 +35,13 @@ const analysisSchema = new mongoose.Schema(
             type: [String],
             default: [],
         },
+        dimensions: {
+            communication: { type: Number, min: 0, max: 100 },
+            technicalKnowledge: { type: Number, min: 0, max: 100 },
+            confidence: { type: Number, min: 0, max: 100 },
+            problemSolving: { type: Number, min: 0, max: 100 },
+            clarity: { type: Number, min: 0, max: 100 },
+        },
     },
     { timestamps: true }
 );

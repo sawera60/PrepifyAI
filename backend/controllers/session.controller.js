@@ -3,6 +3,8 @@ import promptBuilder from "../utils/promptBuilder.js";
 import { getAIResponse } from "../services/openrouter.js";
 import { transcribeAudio } from "../services/deepgram.js";
 import { textToSpeech } from "../services/elevenlabs.js";
+import { Analysis } from "../models/analysis.model.js";
+import { generateAnalysis } from "../services/generateAnalysis.js";
 
 // POST /api/sessions/start
 export const startSession = async (req, res) => {
@@ -115,26 +117,49 @@ export const addMessageToSession = async (req, res) => {
     }
 };
 
-
-
 // PATCH /api/sessions/:id/end
-
 export const endSession = async (req, res) => {
     try {
         const sessionId = req.params.id;
 
-        const session = await Session.findById(sessionId);
+        // 1. Get session with interview populated (needed for analysis context)
+        const session = await Session.findById(sessionId).populate("interviewId");
 
         if (!session) {
             return res.status(404).json({ message: "Session not found" });
         }
 
+        // 2. Mark session as completed
         session.status = "completed";
-
         await session.save();
 
+        // 3. Generate analysis in background (don't block the response)
+        generateAnalysis({
+            transcript: session.transcript,
+            interview: session.interviewId,
+        })
+            .then(async (result) => {
+                const analysis = new Analysis({
+                    userId: session.userId,
+                    interviewId: session.interviewId._id,
+                    sessionId: session._id,
+                    score: result.score,
+                    feedback: result.feedback,
+                    strengths: result.strengths,
+                    weaknesses: result.weaknesses,
+                    dimensions: result.dimensions,
+                });
+                await analysis.save();
+                console.log("✅ Analysis saved for session:", sessionId);
+            })
+            .catch((err) => {
+                console.error("❌ Analysis generation failed:", err.message);
+            });
+
+        // 4. Respond immediately — don't make user wait for analysis
         return res.status(200).json({
             message: "Session completed successfully",
+            sessionId,
         });
 
     } catch (error) {
@@ -228,5 +253,22 @@ export const testVoiceMessage = async (req, res) => {
         res.json({ audio, audioLength: audio?.length ?? 0 });
     } catch (err) {
         res.status(500).json({ message: err.message });
+    }
+};
+
+// GET /api/sessions/:id/analysis
+export const getSessionAnalysis = async (req, res) => {
+    try {
+        const sessionId = req.params.id;
+        const analysis = await Analysis.findOne({ sessionId }).populate("interviewId");
+
+        if (!analysis) {
+            return res.status(404).json({ message: "Analysis not found yet. It might be generating in the background." });
+        }
+
+        return res.status(200).json(analysis);
+    } catch (error) {
+        console.error("Error in getSessionAnalysis:", error.message);
+        return res.status(500).json({ message: "Internal server error" });
     }
 };

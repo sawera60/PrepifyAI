@@ -6,6 +6,8 @@ import { Routes, Route } from "react-router-dom";
 import Dashboard from "./features/dashboard/Dashboard";
 import InterviewChat from "./pages/interview/InterviewChat";
 import CustomInterviewSetup from "./pages/interview/CustomInterviewSetup";
+import InterviewAnalysis from "./features/analysis/interviewAnalysis";
+
 function App() {
 
 
@@ -18,6 +20,7 @@ function App() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/interview/custom/setup" element={<CustomInterviewSetup />} />
         <Route path="/interview/:interviewId" element={<InterviewChat />} />
+        <Route path="/interview/:sessionId/analysis" element={<InterviewAnalysis />} />
       </Routes>
     </>
 

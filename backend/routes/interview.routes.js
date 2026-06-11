@@ -1,5 +1,5 @@
 import express from "express";
-import { getMockInterviews, getMyInterviews } from "../controllers/interview.controller.js";
+import { createCustomInterview, getMockInterviews, getMyInterviews } from "../controllers/interview.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const interviewRouter = express.Router();
@@ -8,6 +8,7 @@ const interviewRouter = express.Router();
 interviewRouter.get("/mock", getMockInterviews);
 //GET   /api/interviews/mine
 interviewRouter.get("/mine", verifyJWT, getMyInterviews);
+interviewRouter.post("/custom/create", verifyJWT, createCustomInterview)
 
 
 export default interviewRouter;

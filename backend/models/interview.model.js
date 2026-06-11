@@ -23,7 +23,7 @@ const interviewSchema = new mongoose.Schema(
             enum: ["Easy", "Medium", "Hard"],
             default: "Easy",
         },
-        experinece: {
+        experience: {
             type: String,
             enum: ["Junior", "Mid", "Senior"]
         },

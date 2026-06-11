@@ -5,7 +5,7 @@ const navItems = [
     { label: "Dashboard", icon: "grid", path: "/dashboard" },
     { label: "My Interviews", icon: "clipboard", path: "/my-interviews" },
     { label: "Mock Interviews", icon: "mic", path: "/mock" },
-    { label: "Generate Interview", icon: "plus", path: "/generateinterview" },
+    { label: "Generate Interview", icon: "plus", path: "/interview/custom/setup" },
     { label: "Resume Analyzer", icon: "file", path: "/resumeanalyzer" },
     { label: "Payment & Plans", icon: "credit-card", path: "/payment" },
     { label: "Settings", icon: "settings", path: "/settings" },

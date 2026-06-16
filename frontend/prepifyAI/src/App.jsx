@@ -1,16 +1,16 @@
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import SignUp from "./features/auth/SignUp";
-import Login from "./features/auth/Login";
+import SignUp from "./features/auth/SignUp.jsx";
+import Login from "./features/auth/Login.jsx";
 import { Routes, Route } from "react-router-dom";
 import Dashboard from "./features/dashboard/Dashboard";
-import InterviewChat from "./pages/interview/InterviewChat";
-import CustomInterviewSetup from "./pages/interview/CustomInterviewSetup";
-import InterviewAnalysis from "./features/analysis/interviewAnalysis";
-import ResumeInterviewSetup from "./pages/resume/ResumeInterviewSetup";
-import MyInterviewsPage from "./pages/interview/MyInterviewsPage";
-import PaymentPage from "./pages/payment/PaymentPage";
-import SettingsPage from "./pages/settings/SettingsPage";
+import InterviewChat from "./pages/interview/InterviewChat.jsx";
+import CustomInterviewSetup from "./pages/interview/CustomInterviewSetup.jsx";
+import InterviewAnalysis from "./features/analysis/interviewAnalysis.jsx";
+import ResumeInterviewSetup from "./pages/resume/ResumeInterviewSetup.jsx";
+import MyInterviewsPage from "./pages/interview/MyInterviewsPage.jsx";
+import PaymentPage from "./pages/payment/PaymentPage.jsx";
+import SettingsPage from "./pages/settings/SettingsPage.jsx";
 
 
 function App() {

@@ -3,7 +3,6 @@ import express from "express";
 import passport from "passport";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import session from "express-session";
 
 import "./config/passport.js";
 import connectDB from "./config/db.js";
@@ -17,7 +16,8 @@ import profileRouter from "./routes/profile.routes.js";
 const app = express();
 const port = process.env.PORT || 8000;
 
-
+// Trust proxy is required for express-session to set secure cookies on Vercel
+app.set("trust proxy", 1);
 
 //Middlewares
 
@@ -37,26 +37,8 @@ app.use(
 );
 
 
-// Session (IMPORTANT for Passport Google OAuth)
-
-app.use(
-    session({
-        secret: process.env.SESSION_SECRET || "secretKey",
-        resave: false,
-        saveUninitialized: false,
-        cookie: {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === "production",
-            sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-        },
-    })
-);
-
-
-// Passport
-
+// Passport (stateless — no session needed on Vercel)
 app.use(passport.initialize());
-app.use(passport.session());
 
 
 

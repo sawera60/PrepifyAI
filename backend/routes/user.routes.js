@@ -25,7 +25,7 @@ router.get(
 router.get(
     "/google/callback",
     passport.authenticate("google", {
-        failureRedirect: process.env.CLIENT_URL ? `${process.env.CLIENT_URL}/signin` : "http://localhost:5173/signin",
+        failureRedirect: process.env.CLIENT_URL ? `${process.env.CLIENT_URL}/login` : "http://localhost:5173/login",
         session: false,
     }),
     (req, res) => {
@@ -46,12 +46,6 @@ router.get(
             sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
             maxAge: 7 * 24 * 60 * 60 * 1000,
         });
-
-        if (req.session) {
-            req.session.destroy((err) => {
-                if (err) console.error("Error destroying session:", err);
-            });
-        }
 
         res.redirect(process.env.CLIENT_URL ? `${process.env.CLIENT_URL}/dashboard` : "http://localhost:5173/dashboard");
     }

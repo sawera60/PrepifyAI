@@ -12,6 +12,7 @@ import connectDB from "./config/db.js";
 import userRouter from "./routes/user.routes.js";
 import interviewRouter from "./routes/interview.routes.js";
 import sessionRouter from "./routes/session.routes.js";
+import profileRouter from "./routes/profile.routes.js";
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -64,6 +65,7 @@ app.use(passport.session());
 app.use("/api/auth", userRouter);  // POST Api for signin signup and google auth
 app.use("/api/interviews", interviewRouter); //GET Api for mock interview
 app.use("/api/sessions", sessionRouter); //POST Api for sessions
+app.use("/api/users", profileRouter); //GET/PUT/DELETE Api for user profile & settings
 
 app.get("/", (req, res) => {
     res.send("PrepifyAI Backend is running!");

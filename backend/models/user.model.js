@@ -28,6 +28,11 @@ const userSchema = new mongoose.Schema({
         enum: ["self", "google"],
         default: "self",
         required: true,
+    },
+    plan: {
+        type: String,
+        enum: ["free", "pro"],
+        default: "free"
     }
 }, { timestamps: true });
 export const User = mongoose.model("User", userSchema)

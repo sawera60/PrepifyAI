@@ -7,6 +7,11 @@ import Dashboard from "./features/dashboard/Dashboard";
 import InterviewChat from "./pages/interview/InterviewChat";
 import CustomInterviewSetup from "./pages/interview/CustomInterviewSetup";
 import InterviewAnalysis from "./features/analysis/interviewAnalysis";
+import ResumeInterviewSetup from "./pages/resume/Resumeinterviewsetup";
+import MyInterviewsPage from "./pages/interview/MyInterviewsPage";
+import PaymentPage from "./pages/payment/PaymentPage";
+import SettingsPage from "./pages/settings/SettingsPage";
+
 
 function App() {
 
@@ -21,6 +26,10 @@ function App() {
         <Route path="/interview/custom/setup" element={<CustomInterviewSetup />} />
         <Route path="/interview/:interviewId" element={<InterviewChat />} />
         <Route path="/interview/:sessionId/analysis" element={<InterviewAnalysis />} />
+        <Route path="/resume/setup" element={<ResumeInterviewSetup />} />
+        <Route path="/my-interviews" element={<MyInterviewsPage />} />
+        <Route path="/payment" element={<PaymentPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
       </Routes>
     </>
 

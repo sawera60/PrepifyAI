@@ -1,9 +1,12 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useInterviewStore from "../../store/interviewStore";
+import ResumeUploadModal from "../../../pages/resume/Resumeuploadmodal";
 
 const MyInterview = () => {
     const navigate = useNavigate();
     const { myInterviews } = useInterviewStore();
+    const [showResumeModal, setShowResumeModal] = useState(false);
 
     return (
         <section className="font-dm mt-6">
@@ -103,7 +106,10 @@ const MyInterview = () => {
                             Upload your resume to get AI-powered insights and personalized interviews.
                         </p>
 
-                        <button className="inline-flex items-center gap-2 border border-white/[0.08] hover:border-[#6C63FF]/40 text-white text-sm font-medium rounded-lg px-4 py-2 transition-all duration-150 hover:bg-[#6C63FF]/5">
+                        <button 
+                            onClick={() => setShowResumeModal(true)}
+                            className="inline-flex items-center gap-2 border border-white/[0.08] hover:border-[#6C63FF]/40 text-white text-sm font-medium rounded-lg px-4 py-2 transition-all duration-150 hover:bg-[#6C63FF]/5"
+                        >
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#6C63FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                                 <polyline points="17 8 12 3 7 8" />
@@ -114,6 +120,7 @@ const MyInterview = () => {
                     </div>
                 </div>
             </div>
+            {showResumeModal && <ResumeUploadModal onClose={() => setShowResumeModal(false)} />}
         </section>
     );
 };

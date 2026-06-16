@@ -609,31 +609,52 @@ const InterviewChat = () => {
                 </div>
 
                 {/* Action buttons */}
-                <div className="flex items-center gap-3 mt-6">
+                <div className="flex flex-col items-center gap-6 mt-12 w-full max-w-md">
                     {!sessionId ? (
                         <button
                             onClick={startSession}
                             disabled={isLoading}
-                            className="px-8 py-3 bg-[#6C63FF] hover:bg-[#5B54E8] disabled:opacity-50 text-white font-semibold rounded-full text-sm transition-all shadow-lg shadow-[#6C63FF]/20"
+                            className="px-8 py-4 bg-[#6C63FF] hover:bg-[#5B54E8] disabled:opacity-50 text-white font-semibold rounded-full text-base transition-all shadow-lg shadow-[#6C63FF]/20 w-full"
                         >
                             {isLoading ? "Starting..." : "Start Interview"}
                         </button>
                     ) : (
                         <>
-                            <button
-                                onClick={isRecording ? stopRecording : startRecording}
-                                className={`w-12 h-12 rounded-full flex items-center justify-center transition-all text-lg ${isRecording
-                                    ? "bg-red-500 hover:bg-red-600 shadow-lg shadow-red-500/30"
-                                    : "bg-[#1A1D2A] border border-white/[0.08] hover:border-[#6C63FF]/40"
-                                    }`}
-                                title={isRecording ? "Stop recording" : "Start recording"}
-                            >
-                                {isRecording ? "⏹" : "🎤"}
-                            </button>
+                            <div className="flex flex-col items-center gap-3">
+                                <button
+                                    onMouseDown={startRecording}
+                                    onMouseUp={stopRecording}
+                                    onTouchStart={(e) => { e.preventDefault(); startRecording(); }}
+                                    onTouchEnd={(e) => { e.preventDefault(); stopRecording(); }}
+                                    disabled={isLoading || isSpeaking}
+                                    className={`relative w-24 h-24 rounded-full flex items-center justify-center transition-all select-none ${isRecording
+                                        ? "bg-[#6C63FF] scale-110 shadow-[0_0_40px_rgba(108,99,255,0.6)]"
+                                        : (isLoading || isSpeaking)
+                                            ? "bg-[#6C63FF]/30 cursor-not-allowed"
+                                            : "bg-[#13151F] border-2 border-[#6C63FF]/40 hover:border-[#6C63FF] hover:bg-[#6C63FF]/10"
+                                        }`}
+                                    title="Hold to speak"
+                                >
+                                    {isRecording && (
+                                        <span className="absolute inset-0 rounded-full bg-[#6C63FF]/30 animate-ping" />
+                                    )}
+                                    <svg
+                                        className={`w-10 h-10 transition-colors ${isRecording ? "text-white" : "text-[#6C63FF]"
+                                            }`}
+                                        fill="currentColor"
+                                        viewBox="0 0 24 24"
+                                    >
+                                        <path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm0 2a2 2 0 0 0-2 2v6a2 2 0 0 0 4 0V5a2 2 0 0 0-2-2zm6.364 5.636a1 1 0 0 1 1.414 1.414A8.966 8.966 0 0 1 13 17.945V20h2a1 1 0 1 1 0 2H9a1 1 0 1 1 0-2h2v-2.055A8.966 8.966 0 0 1 4.222 10.05a1 1 0 1 1 1.414-1.414 7 7 0 0 0 12.728 0z" />
+                                    </svg>
+                                </button>
+                                <p className="text-sm text-[#8B89A0]">
+                                    {isRecording ? "Listening..." : isLoading ? "Processing..." : isSpeaking ? "AI is speaking..." : "Tap and hold to speak"}
+                                </p>
+                            </div>
 
                             <button
                                 onClick={endSession}
-                                className="px-6 py-3 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-full text-sm transition-all shadow-lg shadow-red-500/20 flex items-center gap-2"
+                                className="px-6 py-3 mt-4 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 font-semibold rounded-full text-sm transition-all flex items-center gap-2"
                             >
                                 <span>📵</span> End Interview
                             </button>
@@ -641,74 +662,6 @@ const InterviewChat = () => {
                     )}
                 </div>
             </div>
-
-            {/* Transcript */}
-            {messages.length > 0 && (
-                <div className="flex-1 overflow-y-auto px-6 pb-6 max-w-2xl w-full mx-auto">
-                    <p className="text-xs text-[#8B89A0] uppercase tracking-wider font-semibold mb-3">
-                        Transcript
-                    </p>
-                    <div className="flex flex-col gap-3">
-                        {messages.map((msg, idx) => (
-                            <div
-                                key={idx}
-                                className={`flex gap-3 ${msg.role === "user" ? "flex-row-reverse" : "flex-row"}`}
-                            >
-                                <div className="w-7 h-7 rounded-full overflow-hidden shrink-0 mt-0.5">
-                                    <img
-                                        src={msg.role === "user" ? userAvatar : aiAvatar}
-                                        alt={msg.role}
-                                        className="w-full h-full object-cover"
-                                    />
-                                </div>
-                                <div className={`max-w-[75%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${msg.role === "user"
-                                    ? "bg-[#6C63FF] text-white rounded-br-sm"
-                                    : "bg-[#13151F] border border-white/[0.08] text-gray-200 rounded-bl-sm"
-                                    }`}>
-                                    {msg.content}
-                                </div>
-                            </div>
-                        ))}
-
-                        {isLoading && (
-                            <div className="flex gap-3">
-                                <div className="w-7 h-7 rounded-full overflow-hidden shrink-0">
-                                    <img src={aiAvatar} alt="AI" className="w-full h-full object-cover" />
-                                </div>
-                                <div className="bg-[#13151F] border border-white/[0.08] px-4 py-3 rounded-2xl rounded-bl-sm flex items-center gap-1.5">
-                                    {[0, 150, 300].map((delay) => (
-                                        <div
-                                            key={delay}
-                                            className="w-1.5 h-1.5 bg-[#6C63FF] rounded-full animate-bounce"
-                                            style={{ animationDelay: `${delay}ms` }}
-                                        />
-                                    ))}
-                                </div>
-                            </div>
-                        )}
-
-                        <div ref={messagesEndRef} />
-                    </div>
-
-                    {/* Text input */}
-                    <form onSubmit={sendMessage} className="flex gap-2 mt-4">
-                        <input
-                            value={input}
-                            onChange={(e) => setInput(e.target.value)}
-                            disabled={!sessionId || isLoading}
-                            placeholder="Type your answer..."
-                            className="flex-1 bg-[#13151F] border border-white/[0.08] text-white placeholder-[#8B89A0] px-4 py-3 rounded-xl text-sm focus:outline-none focus:border-[#6C63FF]/50 transition-all disabled:opacity-40"
-                        />
-                        <button
-                            type="submit"
-                            disabled={!input.trim() || isLoading}
-                            className="px-5 py-3 bg-[#6C63FF] hover:bg-[#5B54E8] disabled:opacity-40 text-white font-semibold rounded-xl text-sm transition-all"
-                        >
-                            Send
-                        </button>
-                    </form>
-                </div>
-            )}
         </div>
     );
 };

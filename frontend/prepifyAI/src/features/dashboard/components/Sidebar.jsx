@@ -4,9 +4,9 @@ import logo from "../../../assets/logo.png";
 
 const navItems = [
     { label: "Dashboard", icon: "grid", path: "/dashboard" },
-    { label: "My Interviews", icon: "clipboard", path: "/my-interviews" },
-    { label: "Mock Interviews", icon: "mic", path: "/mock" },
     { label: "Generate Interview", icon: "plus", path: "/interview/custom/setup" },
+    { label: "Analysis Report", icon: "clipboard", path: "/my-interviews" },
+    { label: "Mock Interviews", icon: "mic", path: "/dashboard#mock-interviews" },
     { label: "Resume Analyzer", icon: "file", path: "/resumeanalyzer" },
     { label: "Payment & Plans", icon: "credit-card", path: "/payment" },
     { label: "Settings", icon: "settings", path: "/settings" },
@@ -67,19 +67,40 @@ const Sidebar = ({ mobileOpen, onClose }) => {
     const location = useLocation();
 
     const handleNav = (path) => {
-        navigate(path);
+        if (path.includes("#")) {
+            const [base, hash] = path.split("#");
+            if (location.pathname !== base) {
+                navigate(base);
+                setTimeout(() => {
+                    const el = document.getElementById(hash);
+                    if (el) el.scrollIntoView({ behavior: "smooth" });
+                }, 100);
+            } else {
+                const el = document.getElementById(hash);
+                if (el) el.scrollIntoView({ behavior: "smooth" });
+            }
+        } else {
+            navigate(path);
+        }
         onClose?.(); // close mobile drawer on nav
     };
 
     const navContent = (
         <>
             {/* Logo */}
-            <div className="px-4 py-2 flex items-center justify-between">
-                <img src={logo} alt="PrepifyAI Logo" className="w-26 h-auto object-contain" />
+            <div className="px-5 py-5 flex items-center justify-between border-b border-white/[0.06] mb-2">
+                <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => handleNav("/dashboard")}>
+                    <div className="w-8 h-8 flex items-center justify-center flex-shrink-0">
+                        <img src={logo} alt="logo" className="w-7 h-7 object-contain" />
+                    </div>
+                    <span className="font-syne text-[17px] font-bold tracking-tight text-white">
+                        Prepify<span className="text-[#6C63FF]">AI</span>
+                    </span>
+                </div>
                 {/* Close button — mobile only */}
                 <button
                     onClick={onClose}
-                    className="lg:hidden w-7 h-7 flex items-center justify-center text-[#8B89A0] hover:text-white"
+                    className="lg:hidden w-8 h-8 rounded-lg bg-[#1A1D2A] border border-white/[0.08] flex items-center justify-center text-[#8B89A0] hover:text-white transition-all"
                 >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                         <path d="M18 6L6 18M6 6l12 12" />
@@ -135,7 +156,7 @@ const Sidebar = ({ mobileOpen, onClose }) => {
     return (
         <>
             {/* Desktop Sidebar */}
-            <aside className="font-dm w-[240px] min-h-screen bg-[#13151F] border-r border-white/[0.06] flex-col fixed left-0 top-0 z-40 hidden lg:flex">
+            <aside className="font-dm w-[264px] min-h-screen bg-[#13151F] border-r border-white/[0.06] flex-col fixed left-0 top-0 z-40 hidden lg:flex">
                 {navContent}
             </aside>
 
@@ -149,7 +170,7 @@ const Sidebar = ({ mobileOpen, onClose }) => {
 
             {/* Mobile Drawer */}
             <aside
-                className={`font-dm w-[240px] min-h-screen bg-[#13151F] border-r border-white/[0.06] flex flex-col fixed left-0 top-0 z-50 lg:hidden transition-transform duration-300 ${
+                className={`font-dm w-[264px] min-h-screen bg-[#13151F] border-r border-white/[0.06] flex flex-col fixed left-0 top-0 z-50 lg:hidden transition-transform duration-300 ${
                     mobileOpen ? "translate-x-0" : "-translate-x-full"
                 }`}
             >

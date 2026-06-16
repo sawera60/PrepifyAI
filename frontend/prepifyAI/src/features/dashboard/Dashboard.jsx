@@ -24,20 +24,22 @@ const Dashboard = () => {
             />
 
             {/* Main Content — offset only on lg+ */}
-            <div className="flex-1 min-h-screen lg:ml-[240px]">
+            <div className="flex-1 min-h-screen lg:ml-[264px]">
                 <DashboardHeader onMenuToggle={() => setMobileMenuOpen(true)} />
 
                 <main className="max-w-[1550px] mx-auto px-4 sm:px-6">
                     <Herosection />
                     <MyInterview />
 
-                    {loading ? (
-                        <div className="flex items-center justify-center py-16">
-                            <div className="w-8 h-8 border-2 border-[#6C63FF] border-t-transparent rounded-full animate-spin" />
-                        </div>
-                    ) : (
-                        <MockInterviewList />
-                    )}
+                    <div id="mock-interviews">
+                        {loading ? (
+                            <div className="flex items-center justify-center py-16">
+                                <div className="w-8 h-8 border-2 border-[#6C63FF] border-t-transparent rounded-full animate-spin" />
+                            </div>
+                        ) : (
+                            <MockInterviewList />
+                        )}
+                    </div>
                 </main>
             </div>
         </div>

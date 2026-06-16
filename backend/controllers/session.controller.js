@@ -272,3 +272,19 @@ export const getSessionAnalysis = async (req, res) => {
         return res.status(500).json({ message: "Internal server error" });
     }
 };
+
+// GET /api/sessions/my-sessions
+export const getMySessions = async (req, res) => {
+    try {
+        // Get all analyses for this user, newest first
+        const analyses = await Analysis.find({ userId: req.user._id })
+            .populate("interviewId", "title difficulty category generatedFrom")
+            .sort({ createdAt: -1 });
+
+        return res.status(200).json({ analyses });
+
+    } catch (error) {
+        console.error("Error in getMySessions:", error.message);
+        return res.status(500).json({ message: "Internal server error" });
+    }
+};

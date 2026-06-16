@@ -75,7 +75,7 @@ export const uploadResume = async (req, res) => {
         const pdfBuffer = req.file.buffer;
 
         // Dynamic import so pdfjs-dist doesn't crash the server at startup on Vercel
-        const { default: pdfParse } = await import("pdf-parse");
+        const { default: pdfParse } = await import("pdf-parse-new");
         const parsed = await pdfParse(pdfBuffer);
         const resumeText = parsed.text;
 

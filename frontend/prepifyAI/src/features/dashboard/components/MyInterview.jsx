@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useInterviewStore from "../../store/interviewStore";
-import ResumeUploadModal from "../../../pages/resume/Resumeuploadmodal";
+import ResumeUploadModal from "../../../pages/resume/ResumeUploadModal";
 
 const MyInterview = () => {
     const navigate = useNavigate();

@@ -1,6 +1,6 @@
 import Interview from "../models/interview.model.js";
 import { getAIResponse } from "../services/openrouter.js";
-import { PDFParse } from "pdf-parse";
+// pdf-parse is loaded dynamically to avoid pdfjs-dist crashing Vercel on startup
 
 //MockInterview Controller
 export const getMockInterviews = async (req, res) => {
@@ -73,8 +73,10 @@ export const createCustomInterview = async (req, res) => {
 export const uploadResume = async (req, res) => {
     try {
         const pdfBuffer = req.file.buffer;
-        const parser = new PDFParse({ data: pdfBuffer });
-        const parsed = await parser.getText();
+
+        // Dynamic import so pdfjs-dist doesn't crash the server at startup on Vercel
+        const { default: pdfParse } = await import("pdf-parse");
+        const parsed = await pdfParse(pdfBuffer);
         const resumeText = parsed.text;
 
         if (!resumeText || resumeText.trim().length < 50) {

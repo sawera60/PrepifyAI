@@ -448,76 +448,14 @@ const InterviewChat = () => {
                                 </p>
                             </div>
 
-                            {/* Text input as alternative to voice */}
-                            <form onSubmit={sendMessage} className="flex w-full gap-2">
-                                <input
-                                    type="text"
-                                    value={input}
-                                    onChange={(e) => setInput(e.target.value)}
-                                    placeholder="Or type your answer..."
-                                    disabled={isLoading || isRecording}
-                                    className="flex-1 bg-[#13151F] border border-white/[0.08] rounded-full px-4 py-3 text-sm text-white placeholder-[#8B89A0] focus:outline-none focus:border-[#6C63FF]/50 disabled:opacity-50"
-                                />
-                                <button
-                                    type="submit"
-                                    disabled={!input.trim() || isLoading || isRecording}
-                                    className="px-5 py-3 bg-[#6C63FF] hover:bg-[#5B54E8] disabled:opacity-40 text-white rounded-full text-sm font-medium transition-all"
-                                >
-                                    Send
-                                </button>
-                            </form>
-
                             <button
                                 onClick={endSession}
-                                className="px-6 py-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 font-semibold rounded-full text-sm transition-all flex items-center gap-2"
+                                className="mt-4 px-6 py-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 font-semibold rounded-full text-sm transition-all flex items-center gap-2"
                             >
                                 <span>📵</span> End Interview
                             </button>
                         </>
                     )}
-                </div>
-
-                {/* Transcript */}
-                <div className="w-full max-w-2xl mt-8 space-y-3 pb-8">
-                    {messages.map((msg, i) => (
-                        <div
-                            key={i}
-                            className={`flex gap-3 ${msg.role === "user" ? "flex-row-reverse" : "flex-row"}`}
-                        >
-                            <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
-                                <img
-                                    src={msg.role === "assistant" ? aiAvatar : userAvatar}
-                                    alt={msg.role}
-                                    className="w-full h-full object-cover"
-                                />
-                            </div>
-                            <div
-                                className={`max-w-[75%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${msg.role === "assistant"
-                                    ? "bg-[#13151F] border border-white/[0.08] text-white"
-                                    : "bg-[#6C63FF]/20 border border-[#6C63FF]/20 text-white"
-                                    }`}
-                            >
-                                {msg.content}
-                            </div>
-                        </div>
-                    ))}
-                    {isLoading && (
-                        <div className="flex gap-3">
-                            <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
-                                <img src={aiAvatar} alt="AI" className="w-full h-full object-cover" />
-                            </div>
-                            <div className="bg-[#13151F] border border-white/[0.08] px-4 py-3 rounded-2xl flex items-center gap-1.5">
-                                {[0, 150, 300].map((d) => (
-                                    <div
-                                        key={d}
-                                        className="w-1.5 h-1.5 rounded-full bg-[#6C63FF] animate-bounce"
-                                        style={{ animationDelay: `${d}ms` }}
-                                    />
-                                ))}
-                            </div>
-                        </div>
-                    )}
-                    <div ref={messagesEndRef} />
                 </div>
             </div>
         </div>

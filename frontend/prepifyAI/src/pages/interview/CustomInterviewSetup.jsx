@@ -8,7 +8,6 @@ const CustomInterviewSetup = () => {
   const navigate = useNavigate();
 
   const [conversationHistory, setConversationHistory] = useState([]);
-  const [displayMessages, setDisplayMessages] = useState([]);
   const [isListening, setIsListening] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
@@ -96,12 +95,10 @@ const CustomInterviewSetup = () => {
       try {
         const res = await api.post("/interviews/custom/setup-chat", { messages: [] });
         const { reply, audio } = res.data;
-        setDisplayMessages([{ role: "assistant", content: reply }]);
         setConversationHistory([{ role: "assistant", content: reply }]);
         playAudio(audio, reply);
       } catch (err) {
         const fallback = "Hi! I'm your PrepifyAI assistant. What role are you preparing for?";
-        setDisplayMessages([{ role: "assistant", content: fallback }]);
         setConversationHistory([{ role: "assistant", content: fallback }]);
         speakFallback(fallback);
       } finally {
@@ -203,9 +200,6 @@ const CustomInterviewSetup = () => {
         return;
       }
 
-      // Show user bubble
-      setDisplayMessages((prev) => [...prev, { role: "user", content: transcript }]);
-
       const updatedHistory = [
         ...conversationHistory,
         { role: "user", content: transcript },
@@ -229,7 +223,6 @@ const CustomInterviewSetup = () => {
       const res = await api.post("/interviews/custom/setup-chat", { messages: history });
       const { reply, done, interviewData, audio } = res.data;
 
-      setDisplayMessages((prev) => [...prev, { role: "assistant", content: reply }]);
       setConversationHistory((prev) => [...prev, { role: "assistant", content: reply }]);
       setTurnCount((c) => c + 1);
 

@@ -111,47 +111,59 @@ const CustomInterviewSetup = () => {
     initChat();
   }, []);
 
-  // ── MIC: press down ──
-  const startRecording = async () => {
-    if (isProcessing || isCreating) return;
-    setError(""); // Clear any previous errors
-    try {
+  // ── TOGGLE RECORDING ──
+  const toggleRecording = async () => {
+    if (isListening) {
+      // ── STOP ──
+      if (mediaRecorderRef.current) {
+        const unlock = new SpeechSynthesisUtterance("");
+        window.speechSynthesis.speak(unlock);
+
+        mediaRecorderRef.current.onstop = handleAudioReady;
+        mediaRecorderRef.current.stop();
+        streamRef.current?.getTracks().forEach((t) => t.stop());
+        setIsListening(false);
+        setIsProcessing(true);
+        setStatusText("Processing...");
+      }
+    } else {
+      // ── START ──
+      if (isProcessing || isCreating || isSpeaking) return;
+      setError(""); // Clear any previous errors
+
+      if (currentAudioRef.current) {
+        currentAudioRef.current.pause();
+        currentAudioRef.current = null;
+      }
       window.speechSynthesis.cancel();
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      streamRef.current = stream;
-      audioChunksRef.current = [];
+      setIsSpeaking(false);
 
-      // Explicitly set MIME type for cross-browser consistency
-      const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
-        ? "audio/webm;codecs=opus"
-        : MediaRecorder.isTypeSupported("audio/webm")
-        ? "audio/webm"
-        : "audio/ogg";
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        streamRef.current = stream;
+        audioChunksRef.current = [];
 
-      const mediaRecorder = new MediaRecorder(stream, { mimeType });
-      mediaRecorderRef.current = mediaRecorder;
+        // Explicitly set MIME type for cross-browser consistency
+        const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+          ? "audio/webm;codecs=opus"
+          : MediaRecorder.isTypeSupported("audio/webm")
+          ? "audio/webm"
+          : "audio/ogg";
 
-      mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) audioChunksRef.current.push(e.data);
-      };
+        const mediaRecorder = new MediaRecorder(stream, { mimeType });
+        mediaRecorderRef.current = mediaRecorder;
 
-      mediaRecorder.start();
-      setIsListening(true);
-      setStatusText("Listening...");
-    } catch (err) {
-      setError("Microphone access denied. Please allow mic permissions.");
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data.size > 0) audioChunksRef.current.push(e.data);
+        };
+
+        mediaRecorder.start();
+        setIsListening(true);
+        setStatusText("Listening...");
+      } catch (err) {
+        setError("Microphone access denied. Please allow mic permissions.");
+      }
     }
-  };
-
-  // ── MIC: release ──
-  const stopRecording = () => {
-    if (!mediaRecorderRef.current || !isListening) return;
-    mediaRecorderRef.current.onstop = handleAudioReady;
-    mediaRecorderRef.current.stop();
-    streamRef.current?.getTracks().forEach((t) => t.stop());
-    setIsListening(false);
-    setIsProcessing(true);
-    setStatusText("Processing...");
   };
 
   // ── Send audio to Deepgram, then AI ──
@@ -355,15 +367,12 @@ const CustomInterviewSetup = () => {
         {/* Action buttons */}
         <div className="flex flex-col items-center gap-3 mt-12 w-full max-w-md">
           <button
-            onMouseDown={startRecording}
-            onMouseUp={stopRecording}
-            onTouchStart={(e) => { e.preventDefault(); startRecording(); }}
-            onTouchEnd={(e) => { e.preventDefault(); stopRecording(); }}
-            disabled={isProcessing || isCreating || isSpeaking}
+            onClick={toggleRecording}
+            disabled={micState === "processing" || micState === "creating" || (isSpeaking && !isListening)}
             className={`relative w-24 h-24 rounded-full flex items-center justify-center transition-all select-none
               ${micState === "listening"
                 ? "bg-[#6C63FF] scale-110 shadow-[0_0_40px_rgba(108,99,255,0.6)]"
-                : micState === "processing" || micState === "creating" || isSpeaking
+                : micState === "processing" || micState === "creating" || (isSpeaking && !isListening)
                 ? "bg-[#6C63FF]/30 cursor-not-allowed"
                 : "bg-[#13151F] border-2 border-[#6C63FF]/40 hover:border-[#6C63FF] hover:bg-[#6C63FF]/10"
               }`}
@@ -372,18 +381,25 @@ const CustomInterviewSetup = () => {
             {micState === "listening" && (
               <span className="absolute inset-0 rounded-full bg-[#6C63FF]/30 animate-ping" />
             )}
-            <svg
-              className={`w-10 h-10 transition-colors ${
-                micState === "listening" ? "text-white" : "text-[#6C63FF]"
-              }`}
-              fill="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm0 2a2 2 0 0 0-2 2v6a2 2 0 0 0 4 0V5a2 2 0 0 0-2-2zm6.364 5.636a1 1 0 0 1 1.414 1.414A8.966 8.966 0 0 1 13 17.945V20h2a1 1 0 1 1 0 2H9a1 1 0 1 1 0-2h2v-2.055A8.966 8.966 0 0 1 4.222 10.05a1 1 0 1 1 1.414-1.414 7 7 0 0 0 12.728 0z" />
-            </svg>
+            
+            {micState === "listening" ? (
+                <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <rect x="6" y="6" width="12" height="12" rx="2" />
+                </svg>
+            ) : (
+                <svg
+                  className={`w-10 h-10 transition-colors ${
+                    micState === "processing" || micState === "creating" || (isSpeaking && !isListening) ? "text-[#6C63FF]/40" : "text-[#6C63FF]"
+                  }`}
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm0 2a2 2 0 0 0-2 2v6a2 2 0 0 0 4 0V5a2 2 0 0 0-2-2zm6.364 5.636a1 1 0 0 1 1.414 1.414A8.966 8.966 0 0 1 13 17.945V20h2a1 1 0 1 1 0 2H9a1 1 0 1 1 0-2h2v-2.055A8.966 8.966 0 0 1 4.222 10.05a1 1 0 1 1 1.414-1.414 7 7 0 0 0 12.728 0z" />
+                </svg>
+            )}
           </button>
           <p className="text-sm text-[#8B89A0]">
-             {isListening ? "Listening..." : isProcessing ? "Processing..." : isCreating ? "Creating..." : isSpeaking ? "AI is speaking..." : "Tap and hold to speak"}
+             {isListening ? "Recording — click to stop" : isProcessing ? "Processing..." : isCreating ? "Creating..." : isSpeaking ? "AI is speaking..." : "Click mic to speak"}
           </p>
         </div>
       </div>

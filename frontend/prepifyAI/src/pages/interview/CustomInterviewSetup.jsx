@@ -61,6 +61,7 @@ const CustomInterviewSetup = () => {
   // ── MIC: press down ──
   const startRecording = async () => {
     if (isProcessing || isCreating) return;
+    setError(""); // Clear any previous errors
     try {
       window.speechSynthesis.cancel();
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });

@@ -250,11 +250,10 @@ export const voiceMessageToSession = async (req, res) => {
         });
 
     } catch (error) {
-
-        const serverMsg = err?.response?.data?.message || err?.message || "Unknown error";
-        const serverStatus = err?.response?.status || "no status";
-        setError(`[${serverStatus}] ${serverMsg}`); // This shows on screen
-        console.error("Voice error full:", err?.response?.data || err);
+        console.error("Error in voiceMessageToSession:", error?.response?.data || error);
+        return res.status(error?.response?.status || 500).json({
+            message: error?.response?.data?.message || error?.message || "Internal server error",
+        });
     }
 };
 

@@ -24,6 +24,6 @@ export const textToSpeech = async (text) => {
       ? Buffer.from(err.response.data).toString("utf8") // arraybuffer → readable
       : err.message;
     console.error("ElevenLabs error:", errData);
-    throw err; // let it bubble up so you see it on screen
+    return null; // let it bubble up so you see it on screen
   }
 };

@@ -67,7 +67,14 @@ const CustomInterviewSetup = () => {
       streamRef.current = stream;
       audioChunksRef.current = [];
 
-      const mediaRecorder = new MediaRecorder(stream, { mimeType: "audio/webm" });
+      // Explicitly set MIME type for cross-browser consistency
+      const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+        ? "audio/webm;codecs=opus"
+        : MediaRecorder.isTypeSupported("audio/webm")
+        ? "audio/webm"
+        : "audio/ogg";
+
+      const mediaRecorder = new MediaRecorder(stream, { mimeType });
       mediaRecorderRef.current = mediaRecorder;
 
       mediaRecorder.ondataavailable = (e) => {
@@ -96,14 +103,32 @@ const CustomInterviewSetup = () => {
   // ── Send audio to Deepgram, then AI ──
   const handleAudioReady = async () => {
     try {
-      const audioBlob = new Blob(audioChunksRef.current, { type: "audio/webm" });
-      const formData = new FormData();
-      formData.append("audio", audioBlob, "recording.webm");
+      const recorder = mediaRecorderRef.current;
+      const blobType = recorder?.mimeType || "audio/webm";
+      const audioBlob = new Blob(audioChunksRef.current, { type: blobType });
 
-      // Transcribe via your existing Deepgram endpoint
-      const transcriptRes = await api.post("/interviews/transcribe", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      if (audioBlob.size < 100) {
+        setStatusText("Too short — please hold and speak clearly");
+        setIsProcessing(false);
+        return;
+      }
+
+      const formData = new FormData();
+      const ext = blobType.includes("ogg") ? "ogg" : "webm";
+      formData.append("audio", audioBlob, `recording.${ext}`);
+
+      // Transcribe via Deepgram endpoint
+      let transcriptRes;
+      try {
+        transcriptRes = await api.post("/interviews/transcribe", formData);
+      } catch (transcribeErr) {
+        const msg = transcribeErr?.response?.data?.message || transcribeErr?.message || "Transcription failed";
+        console.error("Transcription error:", msg);
+        setError(`Transcription error: ${msg}`);
+        setIsProcessing(false);
+        setStatusText("Tap and hold to speak");
+        return;
+      }
 
       const transcript = transcriptRes.data.transcript;
       if (!transcript?.trim()) {
@@ -124,7 +149,9 @@ const CustomInterviewSetup = () => {
       // Ask AI for next question / completion
       await getAIResponse(updatedHistory);
     } catch (err) {
-      setError("Something went wrong. Please try again.");
+      const errMsg = err?.response?.data?.message || err?.message || "Unknown error";
+      console.error("handleAudioReady error:", err);
+      setError(`Error: ${errMsg}`);
       setIsProcessing(false);
       setStatusText("Tap and hold to speak");
     }

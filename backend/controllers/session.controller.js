@@ -2,7 +2,7 @@ import Session from "../models/session.model.js";
 import promptBuilder from "../utils/promptBuilder.js";
 import { getAIResponse } from "../services/openrouter.js";
 import { transcribeAudio } from "../services/deepgram.js";
-import { textToSpeech } from "../services/elevenlabs.js";
+//import { textToSpeech } from "../services/elevenlabs.js";
 import { Analysis } from "../models/analysis.model.js";
 import { generateAnalysis } from "../services/generateAnalysis.js";
 
@@ -232,12 +232,13 @@ export const voiceMessageToSession = async (req, res) => {
         });
 
         // 8. Optionally generate speech, but don't fail if ElevenLabs is unavailable
-        let audioBase64 = null;
-        try {
-            audioBase64 = await textToSpeech(aiReply);
-        } catch (ttsError) {
-            console.warn("Text-to-speech skipped:", ttsError.message);
-        }
+        // let audioBase64 = null;
+        // try {
+        //     audioBase64 = await textToSpeech(aiReply);
+        // } catch (ttsError) {
+        //     console.warn("Text-to-speech skipped:", ttsError.message);
+        // }
+        const audioBase64 = null; // TTS handled by Web Speech API on frontend
 
         await session.save();
 

@@ -9,7 +9,6 @@ import {
     testVoiceMessage,
     getSessionAnalysis, getMySessions
 } from "../controllers/session.controller.js";
-import { textToSpeech } from "../services/elevenlabs.js";
 
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 

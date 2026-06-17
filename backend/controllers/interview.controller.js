@@ -1,5 +1,6 @@
 import Interview from "../models/interview.model.js";
 import { getAIResponse } from "../services/openrouter.js";
+import { transcribeAudio } from "../services/deepgram.js";
 // pdf-parse is loaded dynamically to avoid pdfjs-dist crashing Vercel on startup
 
 //MockInterview Controller
@@ -18,6 +19,26 @@ export const getMockInterviews = async (req, res) => {
 
     }
 }
+
+// POST /api/interviews/transcribe  — used by CustomInterviewSetup voice flow
+export const transcribeVoice = async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ message: "No audio file uploaded" });
+        }
+        const audioBuffer = req.file.buffer;
+        const transcript = await transcribeAudio(audioBuffer);
+
+        if (!transcript || !transcript.trim()) {
+            return res.status(400).json({ message: "Could not transcribe audio" });
+        }
+
+        return res.status(200).json({ transcript });
+    } catch (error) {
+        console.error("Transcribe error:", error.message);
+        return res.status(500).json({ message: "Transcription failed" });
+    }
+};
 
 //MyInterview Controller
 export const getMyInterviews = async (req, res) => {

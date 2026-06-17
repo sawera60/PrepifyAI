@@ -1,5 +1,5 @@
 import express from "express";
-import { createCustomInterview, getMockInterviews, getMyInterviews, setupChat } from "../controllers/interview.controller.js";
+import { createCustomInterview, getMockInterviews, getMyInterviews, setupChat, transcribeVoice } from "../controllers/interview.controller.js";
 import { uploadResume, createResumeInterview } from "../controllers/interview.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import multer from "multer";
@@ -15,6 +15,8 @@ interviewRouter.post("/custom/create", verifyJWT, createCustomInterview)
 interviewRouter.post("/custom/setup-chat", verifyJWT, setupChat);
 interviewRouter.post("/resume/upload", verifyJWT, upload.single("resume"), uploadResume);
 interviewRouter.post("/resume/create", verifyJWT, createResumeInterview);
+// POST /api/interviews/transcribe — voice transcription for CustomInterviewSetup
+interviewRouter.post("/transcribe", verifyJWT, upload.single("audio"), transcribeVoice);
 
 
 export default interviewRouter;

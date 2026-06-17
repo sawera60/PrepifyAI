@@ -1,6 +1,7 @@
 import Interview from "../models/interview.model.js";
 import { getAIResponse } from "../services/openrouter.js";
 import { transcribeAudio } from "../services/deepgram.js";
+import { auraTextToSpeech } from "../services/deepgramTTS.js";
 // pdf-parse is loaded dynamically to avoid pdfjs-dist crashing Vercel on startup
 
 //MockInterview Controller
@@ -143,10 +144,12 @@ Be brief, warm, and conversational. 2-3 sentences max.`
         ];
 
         const aiQuestion = await getAIResponse(messages);
+        const audioBase64 = await auraTextToSpeech(aiQuestion);
 
         return res.status(200).json({
             resumeText,
             aiQuestion,
+            audio: audioBase64,
         });
 
     } catch (error) {
@@ -254,11 +257,14 @@ Rules:
 
       if (jsonMatch) {
         const interviewData = JSON.parse(jsonMatch[1]);
-        return res.json({ reply: cleanReply || "Perfect! Setting up your interview now.", done: true, interviewData });
+        const finalReply = cleanReply || "Perfect! Setting up your interview now.";
+        const audioBase64 = await auraTextToSpeech(finalReply);
+        return res.json({ reply: finalReply, done: true, interviewData, audio: audioBase64 });
       }
     }
 
-    res.json({ reply, done: false });
+    const audioBase64 = await auraTextToSpeech(reply);
+    res.json({ reply, done: false, audio: audioBase64 });
   } catch (err) {
     res.status(500).json({ message: "AI setup failed", error: err.message });
   }

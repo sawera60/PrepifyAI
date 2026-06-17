@@ -43,11 +43,11 @@ const ResumeUploadModal = ({ onClose }) => {
 
             const res = await api.post("/interviews/resume/upload", formData);
 
-            // Pass resumeText and aiQuestion to setup page via navigation state
             navigate("/resume/setup", {
                 state: {
                     resumeText: res.data.resumeText,
                     aiQuestion: res.data.aiQuestion,
+                    audio: res.data.audio,
                 },
             });
 

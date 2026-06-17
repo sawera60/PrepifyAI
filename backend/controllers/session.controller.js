@@ -33,6 +33,9 @@ export const startSession = async (req, res) => {
 
         // Get AI response
         const aiReply = await getAIResponse(messages);
+        
+        // Generate TTS audio
+        const audioBase64 = await auraTextToSpeech(aiReply);
 
         // Save AI message to transcript
         session.transcript.push({
@@ -46,6 +49,7 @@ export const startSession = async (req, res) => {
             message: "Session created successfully",
             sessionId: session._id,
             firstMessage: aiReply,
+            audio: audioBase64,
         });
 
     } catch (error) {
@@ -95,6 +99,9 @@ export const addMessageToSession = async (req, res) => {
         // 5. Get AI response (OPENROUTER)
         const aiReply = await getAIResponse(messages);
 
+        // Generate TTS audio
+        const audioBase64 = await auraTextToSpeech(aiReply);
+
         // 6. Save AI message
         session.transcript.push({
             role: "assistant",
@@ -106,6 +113,7 @@ export const addMessageToSession = async (req, res) => {
         // 7. Send response
         return res.status(200).json({
             reply: aiReply,
+            audio: audioBase64,
         });
 
     } catch (error) {

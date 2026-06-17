@@ -7,14 +7,16 @@ const ResumeInterviewSetup = () => {
     const location = useLocation();
 
     // Passed from modal via navigate state
-    const { resumeText, aiQuestion } = location.state || {};
+    const { resumeText, aiQuestion, audio } = location.state || {};
 
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState("");
     const [isCreating, setIsCreating] = useState(false);
     const [error, setError] = useState("");
+    const [isSpeaking, setIsSpeaking] = useState(false);
 
     const messagesEndRef = useRef(null);
+    const currentAudioRef = useRef(null);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -24,12 +26,71 @@ const ResumeInterviewSetup = () => {
         scrollToBottom();
     }, [messages]);
 
-    // Speak helper
-    const speakText = (text) => {
+    // ── 🔊 PLAY DEEPGRAM AUDIO ──
+    const playAudio = (base64, fallbackText, onEndCallback = null) => {
+        if (currentAudioRef.current) {
+            currentAudioRef.current.pause();
+            currentAudioRef.current = null;
+        }
         window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.rate = 1;
-        window.speechSynthesis.speak(utterance);
+
+        if (base64) {
+            setIsSpeaking(true);
+            const audioObj = new Audio(`data:audio/mp3;base64,${base64}`);
+            currentAudioRef.current = audioObj;
+            audioObj.onended = () => {
+                setIsSpeaking(false);
+                currentAudioRef.current = null;
+                if (onEndCallback) onEndCallback();
+            };
+            audioObj.onerror = () => {
+                console.warn("Audio playback failed, falling back to Web Speech");
+                currentAudioRef.current = null;
+                speakFallback(fallbackText, onEndCallback);
+            };
+            audioObj.play().catch(() => {
+                currentAudioRef.current = null;
+                speakFallback(fallbackText, onEndCallback);
+            });
+        } else {
+            speakFallback(fallbackText, onEndCallback);
+        }
+    };
+
+    // ── 🔊 WEB SPEECH FALLBACK ──
+    const speakFallback = (text, onEndCallback = null) => {
+        window.speechSynthesis.resume();
+        window.speechSynthesis.cancel();
+        setIsSpeaking(false);
+        setTimeout(() => {
+            const utterance = new SpeechSynthesisUtterance(text);
+            
+            const pickVoice = () => {
+                const voices = window.speechSynthesis.getVoices();
+                const preferred = ["Google UK English Female", "Google US English", "Microsoft Aria Online (Natural)", "Samantha"];
+                const picked = preferred.map((name) => voices.find((v) => v.name === name)).find(Boolean);
+                if (picked) utterance.voice = picked;
+            };
+            if (window.speechSynthesis.getVoices().length > 0) pickVoice();
+            else window.speechSynthesis.onvoiceschanged = pickVoice;
+
+            utterance.rate = 0.92;
+            utterance.pitch = 1.0;
+            
+            window.activeUtterance = utterance;
+            setIsSpeaking(true);
+
+            utterance.onend = () => {
+                setIsSpeaking(false);
+                window.activeUtterance = null;
+                if (onEndCallback) onEndCallback();
+            };
+            utterance.onerror = () => {
+                setIsSpeaking(false);
+                window.activeUtterance = null;
+            };
+            window.speechSynthesis.speak(utterance);
+        }, 100);
     };
 
     // Redirect if no resume data (direct URL access)
@@ -40,7 +101,7 @@ const ResumeInterviewSetup = () => {
         }
         // Show AI's first question
         setMessages([{ role: "assistant", content: aiQuestion }]);
-        speakText(aiQuestion);
+        playAudio(audio, aiQuestion);
     }, []);
 
     // -----------------------------
@@ -59,7 +120,7 @@ const ResumeInterviewSetup = () => {
         // Create the interview immediately
         const confirmMsg = `Perfect! I'll create a personalized "${userInput}" interview based on your resume. Setting it up now... 🚀`;
         setMessages((prev) => [...prev, { role: "assistant", content: confirmMsg }]);
-        speakText(confirmMsg);
+        speakFallback(confirmMsg);
 
         setIsCreating(true);
         await createInterview(userInput);

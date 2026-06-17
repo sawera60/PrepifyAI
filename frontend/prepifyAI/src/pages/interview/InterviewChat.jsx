@@ -142,8 +142,8 @@ const InterviewChat = () => {
             setSessionId(res.data.sessionId);
             if (res.data.firstMessage) {
                 setMessages([{ role: "assistant", content: res.data.firstMessage }]);
-                // First message comes from text endpoint — no audio, use fallback
-                speakFallback(res.data.firstMessage);
+                // Play Deepgram Aura audio if backend returned it, else fallback
+                playAudio(res.data.audio, res.data.firstMessage);
             }
         } catch (err) {
             const msg = err?.response?.data?.message || err?.message || "Failed to start session.";
@@ -175,7 +175,10 @@ const InterviewChat = () => {
             });
             const { isComplete, cleanReply } = checkInterviewComplete(res.data.reply);
             setMessages((prev) => [...prev, { role: "assistant", content: cleanReply }]);
-            speakFallback(cleanReply); // text endpoint has no audio field
+
+            // Play Deepgram Aura audio if backend returned it, else fallback
+            playAudio(res.data.audio, cleanReply);
+
             if (isComplete) setTimeout(() => endSession(), 3000);
         } catch (err) {
             const msg = err?.response?.data?.message || err?.message || "Failed to send message.";

@@ -4,8 +4,6 @@ import api from "../../services/api";
 import aiAvatar from "../../assets/robot2.png";
 import userAvatar from "../../assets/user.jpeg";
 
-const INITIAL_PROMPT = "Hi! I'm your PrepifyAI assistant. What role are you preparing for?";
-
 const CustomInterviewSetup = () => {
   const navigate = useNavigate();
 
@@ -22,16 +20,58 @@ const CustomInterviewSetup = () => {
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
   const streamRef = useRef(null);
+  const currentAudioRef = useRef(null);
 
-  // ── TTS ──
-  const speakText = (text, onEnd) => {
+  // ── 🔊 PLAY DEEPGRAM AUDIO ──
+  const playAudio = (base64, fallbackText, onEndCallback = null) => {
+    if (currentAudioRef.current) {
+        currentAudioRef.current.pause();
+        currentAudioRef.current = null;
+    }
+    window.speechSynthesis.cancel();
+
+    if (base64) {
+        setIsSpeaking(true);
+        const audio = new Audio(`data:audio/mp3;base64,${base64}`);
+        currentAudioRef.current = audio;
+        audio.onended = () => {
+            setIsSpeaking(false);
+            currentAudioRef.current = null;
+            if (onEndCallback) onEndCallback();
+        };
+        audio.onerror = () => {
+            console.warn("Audio playback failed, falling back to Web Speech");
+            currentAudioRef.current = null;
+            speakFallback(fallbackText, onEndCallback);
+        };
+        audio.play().catch(() => {
+            currentAudioRef.current = null;
+            speakFallback(fallbackText, onEndCallback);
+        });
+    } else {
+        speakFallback(fallbackText, onEndCallback);
+    }
+  };
+
+  // ── 🔊 WEB SPEECH FALLBACK ──
+  const speakFallback = (text, onEndCallback = null) => {
     window.speechSynthesis.resume();
     window.speechSynthesis.cancel();
     setIsSpeaking(false);
     setTimeout(() => {
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 1;
-      utterance.pitch = 1;
+      
+      const pickVoice = () => {
+          const voices = window.speechSynthesis.getVoices();
+          const preferred = ["Google UK English Female", "Google US English", "Microsoft Aria Online (Natural)", "Samantha"];
+          const picked = preferred.map((name) => voices.find((v) => v.name === name)).find(Boolean);
+          if (picked) utterance.voice = picked;
+      };
+      if (window.speechSynthesis.getVoices().length > 0) pickVoice();
+      else window.speechSynthesis.onvoiceschanged = pickVoice;
+
+      utterance.rate = 0.92;
+      utterance.pitch = 1.0;
       
       window.activeUtterance = utterance;
       setIsSpeaking(true);
@@ -39,23 +79,36 @@ const CustomInterviewSetup = () => {
       utterance.onend = () => {
         setIsSpeaking(false);
         window.activeUtterance = null;
-        if (onEnd) onEnd();
+        if (onEndCallback) onEndCallback();
       };
       utterance.onerror = () => {
         setIsSpeaking(false);
         window.activeUtterance = null;
       };
-
       window.speechSynthesis.speak(utterance);
     }, 100);
   };
 
   // ── First question on mount ──
   useEffect(() => {
-    const firstMsg = { role: "assistant", content: INITIAL_PROMPT };
-    setDisplayMessages([firstMsg]);
-    setConversationHistory([{ role: "assistant", content: INITIAL_PROMPT }]);
-    speakText(INITIAL_PROMPT);
+    const initChat = async () => {
+      setIsProcessing(true);
+      try {
+        const res = await api.post("/interviews/custom/setup-chat", { messages: [] });
+        const { reply, audio } = res.data;
+        setDisplayMessages([{ role: "assistant", content: reply }]);
+        setConversationHistory([{ role: "assistant", content: reply }]);
+        playAudio(audio, reply);
+      } catch (err) {
+        const fallback = "Hi! I'm your PrepifyAI assistant. What role are you preparing for?";
+        setDisplayMessages([{ role: "assistant", content: fallback }]);
+        setConversationHistory([{ role: "assistant", content: fallback }]);
+        speakFallback(fallback);
+      } finally {
+        setIsProcessing(false);
+      }
+    };
+    initChat();
   }, []);
 
   // ── MIC: press down ──
@@ -162,20 +215,20 @@ const CustomInterviewSetup = () => {
   const getAIResponse = async (history) => {
     try {
       const res = await api.post("/interviews/custom/setup-chat", { messages: history });
-      const { reply, done, interviewData } = res.data;
+      const { reply, done, interviewData, audio } = res.data;
 
       setDisplayMessages((prev) => [...prev, { role: "assistant", content: reply }]);
       setConversationHistory((prev) => [...prev, { role: "assistant", content: reply }]);
       setTurnCount((c) => c + 1);
 
       if (done && interviewData) {
-        speakText(reply, async () => {
+        playAudio(audio, reply, async () => {
           setIsCreating(true);
           setStatusText("Creating your interview...");
           await createInterview(interviewData);
         });
       } else {
-        speakText(reply);
+        playAudio(audio, reply);
         setIsProcessing(false);
         setStatusText("Tap and hold to speak");
       }

@@ -1,8 +1,5 @@
 import axios from "axios";
 
-// Use Deepgram REST API directly (more reliable than SDK for buffer uploads)
-// The SDK v5 doesn't properly infer Content-Type from a raw Buffer,
-// causing "corrupt or unsupported data" errors from Deepgram.
 export const transcribeAudio = async (audioBuffer, mimeType = "audio/webm") => {
     try {
         const apiKey = process.env.DEEPGRAM_API_KEY;
@@ -12,8 +9,6 @@ export const transcribeAudio = async (audioBuffer, mimeType = "audio/webm") => {
             return "";
         }
 
-        // Normalize MIME type — Deepgram accepts audio/webm and audio/ogg
-        // Strip codec parameters (e.g. "audio/webm;codecs=opus" → "audio/webm")
         const baseMime = mimeType.split(";")[0].trim();
         const contentType = baseMime || "audio/webm";
 

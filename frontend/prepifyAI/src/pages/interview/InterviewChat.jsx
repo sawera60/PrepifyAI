@@ -1,339 +1,3 @@
-
-
-// import React, { useState, useRef, useEffect } from "react";
-// import { useParams, useNavigate } from "react-router-dom";
-// import api from "../../services/api";
-
-// const InterviewChat = () => {
-//     const { interviewId } = useParams();
-//     const navigate = useNavigate();
-
-//     const [messages, setMessages] = useState([]);
-//     const [input, setInput] = useState("");
-//     const [sessionId, setSessionId] = useState(null);
-//     const [isLoading, setIsLoading] = useState(false);
-//     const [error, setError] = useState("");
-
-//     // 🎤 VOICE STATES
-//     const [isRecording, setIsRecording] = useState(false);
-//     const [mediaRecorder, setMediaRecorder] = useState(null);
-
-//     const messagesEndRef = useRef(null);
-
-//     const scrollToBottom = () => {
-//         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-//     };
-
-//     useEffect(() => {
-//         scrollToBottom();
-//     }, [messages, isLoading]);
-
-//     // -----------------------------
-//     // 🔊 SPEAK HELPER
-//     // -----------------------------
-//     const speakText = (text) => {
-//         window.speechSynthesis.cancel(); // stop any previous speech
-//         const utterance = new SpeechSynthesisUtterance(text);
-//         utterance.rate = 1;
-//         utterance.pitch = 1;
-//         window.speechSynthesis.speak(utterance);
-//     };
-
-//     // -----------------------------
-//     // ✅ INTERVIEW COMPLETE DETECTION
-//     // -----------------------------
-//     const checkInterviewComplete = (reply) => {
-//         if (reply.includes("[INTERVIEW_COMPLETE]")) {
-//             const cleanReply = reply.replace("[INTERVIEW_COMPLETE]", "").trim();
-//             return { isComplete: true, cleanReply };
-//         }
-//         return { isComplete: false, cleanReply: reply };
-//     };
-
-//     // -----------------------------
-//     // START SESSION
-//     // -----------------------------
-//     const startSession = async () => {
-//         try {
-//             setError("");
-//             setIsLoading(true);
-
-//             const res = await api.post(`/sessions/start`, { interviewId });
-
-//             setSessionId(res.data.sessionId);
-
-//             if (res.data.firstMessage) {
-//                 setMessages([
-//                     { role: "assistant", content: res.data.firstMessage }
-//                 ]);
-//                 speakText(res.data.firstMessage);
-//             }
-//         } catch (error) {
-//             setError(error.response?.data?.message || "Failed to start session.");
-//         } finally {
-//             setIsLoading(false);
-//         }
-//     };
-
-//     // -----------------------------
-//     // TEXT MESSAGE FLOW
-//     // -----------------------------
-//     const sendMessage = async (e) => {
-//         e.preventDefault();
-//         if (!input.trim() || !sessionId) return;
-
-//         const userMsg = { role: "user", content: input };
-//         setMessages((prev) => [...prev, userMsg]);
-//         setInput("");
-//         setIsLoading(true);
-//         setError("");
-
-//         try {
-//             const res = await api.post(
-//                 `/sessions/${sessionId}/message`,
-//                 { message: userMsg.content }
-//             );
-
-//             const { isComplete, cleanReply } = checkInterviewComplete(res.data.reply);
-
-//             setMessages((prev) => [
-//                 ...prev,
-//                 { role: "assistant", content: cleanReply }
-//             ]);
-
-//             // 🔊 speak the reply
-//             speakText(cleanReply);
-
-//             if (isComplete) {
-//                 setTimeout(() => {
-//                     endSession();
-//                 }, 3000);
-//             }
-
-//         } catch (error) {
-//             setError(error.response?.data?.message || "Failed to send message.");
-//         } finally {
-//             setIsLoading(false);
-//         }
-//     };
-
-//     // -----------------------------
-//     // 🎤 START RECORDING
-//     // -----------------------------
-//     const startRecording = async () => {
-//         try {
-//             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-
-//             const recorder = new MediaRecorder(stream);
-//             const chunks = [];
-
-//             recorder.ondataavailable = (e) => {
-//                 chunks.push(e.data);
-//             };
-
-//             recorder.onstop = async () => {
-//                 const blob = new Blob(chunks, { type: "audio/webm" });
-//                 await sendAudio(blob);
-//             };
-
-//             recorder.start();
-//             setMediaRecorder(recorder);
-//             setIsRecording(true);
-
-//         } catch (err) {
-//             setError("Microphone not available on this device.");
-//         }
-//     };
-
-//     // -----------------------------
-//     // ⛔ STOP RECORDING
-//     // -----------------------------
-//     const stopRecording = () => {
-//         if (mediaRecorder) {
-//             mediaRecorder.stop();
-//             setIsRecording(false);
-//         }
-//     };
-
-//     // -----------------------------
-//     // 📡 SEND AUDIO TO BACKEND
-//     // -----------------------------
-//     const sendAudio = async (blob) => {
-//         if (!sessionId) return;
-
-//         setIsLoading(true);
-//         setError("");
-
-//         try {
-//             const formData = new FormData();
-//             formData.append("audio", blob);
-
-//             const res = await api.post(
-//                 `/sessions/${sessionId}/voice-message`,
-//                 formData
-//             );
-
-//             // 💬 show user's transcribed text
-//             if (res.data.userText) {
-//                 setMessages((prev) => [
-//                     ...prev,
-//                     { role: "user", content: res.data.userText }
-//                 ]);
-//             }
-
-//             const { isComplete, cleanReply } = checkInterviewComplete(res.data.reply);
-
-//             // 💬 show AI text (cleaned)
-//             setMessages((prev) => [
-//                 ...prev,
-//                 { role: "assistant", content: cleanReply }
-//             ]);
-
-//             // 🔊 speak the reply
-//             speakText(cleanReply);
-
-//             if (isComplete) {
-//                 setTimeout(() => {
-//                     endSession();
-//                 }, 3000);
-//             }
-
-//         } catch (error) {
-//             setError(error.response?.data?.message || "Voice message failed.");
-//         } finally {
-//             setIsLoading(false);
-//         }
-//     };
-
-//     // -----------------------------
-//     // TEST AI VOICE
-//     // -----------------------------
-//     const testVoice = () => {
-//         speakText("Hello! This is a voice test from PrepifyAI.");
-//         setError("✅ Audio played successfully!");
-//     };
-
-//     // -----------------------------
-//     // END SESSION
-//     // -----------------------------
-//     const endSession = async () => {
-//         if (!sessionId) return;
-
-//         try {
-//             setIsLoading(true);
-//             await api.patch(`/sessions/${sessionId}/end`);
-//             navigate(`/interview/${sessionId}/analysis`);
-//         } catch (error) {
-//             setError("Failed to end session.");
-//         } finally {
-//             setIsLoading(false);
-//         }
-//     };
-
-//     // -----------------------------
-//     // UI
-//     // -----------------------------
-//     return (
-//         <div className="flex flex-col h-screen max-w-3xl mx-auto p-4 bg-gray-50 text-black">
-
-//             <header className="mb-4 text-center">
-//                 <h1 className="text-2xl font-bold">Interview Chat</h1>
-
-//                 {error && (
-//                     <div className="mt-3 p-2 bg-red-100 text-red-700 rounded">
-//                         {error}
-//                     </div>
-//                 )}
-
-//                 {!sessionId ? (
-//                     <button
-//                         onClick={startSession}
-//                         disabled={isLoading}
-//                         className="mt-2 px-4 py-2 bg-blue-600 text-white rounded"
-//                     >
-//                         Start Interview
-//                     </button>
-//                 ) : (
-//                     <button
-//                         onClick={endSession}
-//                         className="mt-2 px-4 py-2 bg-red-600 text-white rounded"
-//                     >
-//                         End Interview
-//                     </button>
-//                 )}
-//             </header>
-
-//             {/* CHAT BOX */}
-//             <div className="flex-1 overflow-y-auto p-4 bg-white border rounded flex flex-col gap-3">
-
-//                 {messages.map((msg, idx) => (
-//                     <div
-//                         key={idx}
-//                         className={`max-w-[80%] p-3 rounded ${msg.role === "user"
-//                             ? "bg-blue-100 self-end"
-//                             : "bg-gray-100 self-start"
-//                             }`}
-//                     >
-//                         {msg.content}
-//                     </div>
-//                 ))}
-
-//                 {isLoading && (
-//                     <div className="text-gray-500 italic">
-//                         AI is thinking...
-//                     </div>
-//                 )}
-
-//                 <div ref={messagesEndRef} />
-//             </div>
-
-//             {/* INPUT + VOICE CONTROLS */}
-//             <form onSubmit={sendMessage} className="flex gap-2 mt-3">
-
-//                 <input
-//                     value={input}
-//                     onChange={(e) => setInput(e.target.value)}
-//                     disabled={!sessionId || isLoading}
-//                     className="flex-1 border p-2 rounded"
-//                     placeholder="Type your answer..."
-//                 />
-
-//                 {/* TEXT SEND */}
-//                 <button
-//                     type="submit"
-//                     disabled={!input.trim() || isLoading}
-//                     className="px-4 bg-blue-600 text-white rounded"
-//                 >
-//                     Send
-//                 </button>
-
-//                 {/* TEST VOICE BUTTON */}
-//                 <button
-//                     type="button"
-//                     onClick={testVoice}
-//                     className="px-4 rounded bg-indigo-600 text-white"
-//                 >
-//                     Test 🔊
-//                 </button>
-
-//                 {/* 🎤 MIC BUTTON */}
-//                 <button
-//                     type="button"
-//                     onClick={isRecording ? stopRecording : startRecording}
-//                     className={`px-4 rounded text-white ${isRecording ? "bg-red-600" : "bg-green-600"}`}
-//                     disabled={!sessionId}
-//                 >
-//                     {isRecording ? "Stop 🎙️" : "Speak 🎤"}
-//                 </button>
-
-//             </form>
-//         </div>
-//     );
-// };
-
-// export default InterviewChat;
-
-
 import React, { useState, useRef, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../../services/api";
@@ -350,44 +14,98 @@ const InterviewChat = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
     const [isRecording, setIsRecording] = useState(false);
-    const [mediaRecorder, setMediaRecorder] = useState(null);
     const [isSpeaking, setIsSpeaking] = useState(false);
 
+    const mediaRecorderRef = useRef(null);
+    const audioChunksRef = useRef([]);
+    const streamRef = useRef(null);
+    const currentAudioRef = useRef(null);
     const messagesEndRef = useRef(null);
 
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    };
-
     useEffect(() => {
-        scrollToBottom();
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     }, [messages, isLoading]);
 
     // -----------------------------
-    // 🔊 SPEAK HELPER
+    // 🔊 PLAY DEEPGRAM AUDIO (base64)
+    // Falls back to Web Speech if audio is null
     // -----------------------------
-    const speakText = (text) => {
-        // Force resume in case the browser's speech synthesis engine got stuck/paused
-        window.speechSynthesis.resume();
+    const playAudio = (base64, fallbackText) => {
+        // Stop any currently playing audio
+        if (currentAudioRef.current) {
+            currentAudioRef.current.pause();
+            currentAudioRef.current = null;
+        }
+        window.speechSynthesis.cancel();
+
+        if (base64) {
+            setIsSpeaking(true);
+            const audio = new Audio(`data:audio/mp3;base64,${base64}`);
+            currentAudioRef.current = audio;
+            audio.onended = () => {
+                setIsSpeaking(false);
+                currentAudioRef.current = null;
+            };
+            audio.onerror = () => {
+                console.warn("Audio playback failed, falling back to Web Speech");
+                currentAudioRef.current = null;
+                speakFallback(fallbackText);
+            };
+            audio.play().catch(() => {
+                currentAudioRef.current = null;
+                speakFallback(fallbackText);
+            });
+        } else {
+            // No audio from backend — use Web Speech API as fallback
+            speakFallback(fallbackText);
+        }
+    };
+
+    // -----------------------------
+    // 🔊 WEB SPEECH FALLBACK
+    // Picks the best available voice
+    // -----------------------------
+    const speakFallback = (text) => {
         window.speechSynthesis.cancel();
         setIsSpeaking(false);
 
-        // Wait a tiny bit for the cancel to resolve in the browser's speech thread
         setTimeout(() => {
             const utterance = new SpeechSynthesisUtterance(text);
-            utterance.rate = 1;
-            utterance.pitch = 1;
 
-            // Fix garbage collection issue in Chrome by binding it to window
+            const pickVoice = () => {
+                const voices = window.speechSynthesis.getVoices();
+                const preferred = [
+                    "Google UK English Female",
+                    "Google US English",
+                    "Microsoft Aria Online (Natural)",
+                    "Microsoft Jenny Online (Natural)",
+                    "Samantha",
+                    "Karen",
+                ];
+                const picked = preferred
+                    .map((name) => voices.find((v) => v.name === name))
+                    .find(Boolean);
+                if (picked) utterance.voice = picked;
+            };
+
+            if (window.speechSynthesis.getVoices().length > 0) {
+                pickVoice();
+            } else {
+                window.speechSynthesis.onvoiceschanged = pickVoice;
+            }
+
+            utterance.rate = 0.92;
+            utterance.pitch = 1.0;
+            utterance.volume = 1.0;
+
             window.activeUtterance = utterance;
-
             setIsSpeaking(true);
+
             utterance.onend = () => {
                 setIsSpeaking(false);
                 window.activeUtterance = null;
             };
-            utterance.onerror = (e) => {
-                console.error("SpeechSynthesis error:", e);
+            utterance.onerror = () => {
                 setIsSpeaking(false);
                 window.activeUtterance = null;
             };
@@ -401,8 +119,10 @@ const InterviewChat = () => {
     // -----------------------------
     const checkInterviewComplete = (reply) => {
         if (reply.includes("[INTERVIEW_COMPLETE]")) {
-            const cleanReply = reply.replace("[INTERVIEW_COMPLETE]", "").trim();
-            return { isComplete: true, cleanReply };
+            return {
+                isComplete: true,
+                cleanReply: reply.replace("[INTERVIEW_COMPLETE]", "").trim(),
+            };
         }
         return { isComplete: false, cleanReply: reply };
     };
@@ -412,9 +132,9 @@ const InterviewChat = () => {
     // -----------------------------
     const startSession = async () => {
         try {
-            // Unlock speech synthesis immediately inside user gesture!
-            const unlockUtterance = new SpeechSynthesisUtterance("");
-            window.speechSynthesis.speak(unlockUtterance);
+            // Unlock audio context on user gesture (required by browsers)
+            const unlock = new SpeechSynthesisUtterance("");
+            window.speechSynthesis.speak(unlock);
 
             setError("");
             setIsLoading(true);
@@ -422,10 +142,12 @@ const InterviewChat = () => {
             setSessionId(res.data.sessionId);
             if (res.data.firstMessage) {
                 setMessages([{ role: "assistant", content: res.data.firstMessage }]);
-                speakText(res.data.firstMessage);
+                // First message comes from text endpoint — no audio, use fallback
+                speakFallback(res.data.firstMessage);
             }
-        } catch (error) {
-            setError(error.response?.data?.message || "Failed to start session.");
+        } catch (err) {
+            const msg = err?.response?.data?.message || err?.message || "Failed to start session.";
+            setError(`[${err?.response?.status || "ERR"}] ${msg}`);
         } finally {
             setIsLoading(false);
         }
@@ -438,9 +160,8 @@ const InterviewChat = () => {
         e.preventDefault();
         if (!input.trim() || !sessionId) return;
 
-        // Unlock speech synthesis immediately inside user gesture!
-        const unlockUtterance = new SpeechSynthesisUtterance("");
-        window.speechSynthesis.speak(unlockUtterance);
+        const unlock = new SpeechSynthesisUtterance("");
+        window.speechSynthesis.speak(unlock);
 
         const userMsg = { role: "user", content: input };
         setMessages((prev) => [...prev, userMsg]);
@@ -454,75 +175,118 @@ const InterviewChat = () => {
             });
             const { isComplete, cleanReply } = checkInterviewComplete(res.data.reply);
             setMessages((prev) => [...prev, { role: "assistant", content: cleanReply }]);
-            speakText(cleanReply);
+            speakFallback(cleanReply); // text endpoint has no audio field
             if (isComplete) setTimeout(() => endSession(), 3000);
-        } catch (error) {
-            setError(error.response?.data?.message || "Failed to send message.");
+        } catch (err) {
+            const msg = err?.response?.data?.message || err?.message || "Failed to send message.";
+            setError(`[${err?.response?.status || "ERR"}] ${msg}`);
         } finally {
             setIsLoading(false);
         }
     };
 
     // -----------------------------
-    // 🎤 RECORDING
+    // 🎤 TOGGLE RECORDING
+    // Click once → start, click again → stop
+    // Works on both laptop and mobile
     // -----------------------------
-    const startRecording = async () => {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            // Use a supported MIME type — webm/opus is supported in Chrome/Edge, ogg/opus in Firefox
-            const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
-                ? "audio/webm;codecs=opus"
-                : MediaRecorder.isTypeSupported("audio/webm")
-                ? "audio/webm"
-                : "audio/ogg";
-            const recorder = new MediaRecorder(stream, { mimeType });
-            const chunks = [];
-            recorder.ondataavailable = (e) => chunks.push(e.data);
-            recorder.onstop = async () => {
-                const blob = new Blob(chunks, { type: recorder.mimeType });
-                await sendAudio(blob);
-            };
-            recorder.start();
-            setMediaRecorder(recorder);
-            setIsRecording(true);
-        } catch (err) {
-            setError("Microphone not available on this device.");
+    const toggleRecording = async () => {
+        if (isRecording) {
+            // ── STOP ──
+            if (mediaRecorderRef.current) {
+                // Unlock audio on user gesture before stopping
+                const unlock = new SpeechSynthesisUtterance("");
+                window.speechSynthesis.speak(unlock);
+
+                mediaRecorderRef.current.stop();
+                streamRef.current?.getTracks().forEach((t) => t.stop());
+                setIsRecording(false);
+            }
+        } else {
+            // ── START ──
+            if (isLoading || isSpeaking) return;
+            setError("");
+
+            // Stop AI speaking when user wants to respond
+            if (currentAudioRef.current) {
+                currentAudioRef.current.pause();
+                currentAudioRef.current = null;
+            }
+            window.speechSynthesis.cancel();
+            setIsSpeaking(false);
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                streamRef.current = stream;
+                audioChunksRef.current = [];
+
+                const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+                    ? "audio/webm;codecs=opus"
+                    : MediaRecorder.isTypeSupported("audio/webm")
+                        ? "audio/webm"
+                        : "audio/ogg";
+
+                const recorder = new MediaRecorder(stream, { mimeType });
+                mediaRecorderRef.current = recorder;
+
+                recorder.ondataavailable = (e) => {
+                    if (e.data.size > 0) audioChunksRef.current.push(e.data);
+                };
+
+                recorder.onstop = async () => {
+                    const blob = new Blob(audioChunksRef.current, { type: recorder.mimeType });
+                    await sendAudio(blob, recorder.mimeType);
+                };
+
+                recorder.start();
+                setIsRecording(true);
+            } catch (err) {
+                setError("Microphone access denied. Please allow mic permissions.");
+            }
         }
     };
 
-    const stopRecording = () => {
-        if (mediaRecorder) {
-            // Unlock speech synthesis immediately inside user gesture!
-            const unlockUtterance = new SpeechSynthesisUtterance("");
-            window.speechSynthesis.speak(unlockUtterance);
-
-            mediaRecorder.stop();
-            setIsRecording(false);
-        }
-    };
-
     // -----------------------------
-    // 📡 SEND AUDIO
+    // 📡 SEND AUDIO TO BACKEND
     // -----------------------------
-    const sendAudio = async (blob) => {
+    const sendAudio = async (blob, mimeType) => {
         if (!sessionId) return;
+
+        if (blob.size < 100) {
+            setError("Recording too short — please speak for at least 1 second.");
+            return;
+        }
+
         setIsLoading(true);
         setError("");
+
         try {
             const formData = new FormData();
-            // Use blob.type to pick the right file extension (webm on Chrome, ogg on Firefox)
-            const ext = blob.type.includes("ogg") ? "ogg" : "webm";
+            const ext = (mimeType || blob.type).includes("ogg") ? "ogg" : "webm";
             formData.append("audio", blob, `recording.${ext}`);
+
             const res = await api.post(`/sessions/${sessionId}/voice-message`, formData);
+
             if (res.data.userText) {
-                setMessages((prev) => [...prev, { role: "user", content: res.data.userText }]);
+                setMessages((prev) => [
+                    ...prev,
+                    { role: "user", content: res.data.userText },
+                ]);
             }
+
             const { isComplete, cleanReply } = checkInterviewComplete(res.data.reply);
-            setMessages((prev) => [...prev, { role: "assistant", content: cleanReply }]);
-            speakText(cleanReply);
+            setMessages((prev) => [
+                ...prev,
+                { role: "assistant", content: cleanReply },
+            ]);
+
+            // Play Deepgram Aura audio if backend returned it, else fallback
+            playAudio(res.data.audio, cleanReply);
+
             if (isComplete) setTimeout(() => endSession(), 3000);
-        } catch (error) {
-            setError(error.response?.data?.message || "Voice message failed.");
+        } catch (err) {
+            const msg = err?.response?.data?.message || err?.message || "Voice message failed.";
+            setError(`[${err?.response?.status || "ERR"}] ${msg}`);
         } finally {
             setIsLoading(false);
         }
@@ -537,12 +301,21 @@ const InterviewChat = () => {
             setIsLoading(true);
             await api.patch(`/sessions/${sessionId}/end`);
             navigate(`/interview/${sessionId}/analysis`);
-        } catch (error) {
+        } catch (err) {
             setError("Failed to end session.");
         } finally {
             setIsLoading(false);
         }
     };
+
+    // Mic button visual state
+    const micState = isLoading
+        ? "loading"
+        : isRecording
+            ? "recording"
+            : isSpeaking
+                ? "speaking"
+                : "idle";
 
     return (
         <div className="min-h-screen bg-[#0B0D14] font-dm text-white flex flex-col">
@@ -561,7 +334,7 @@ const InterviewChat = () => {
                         </div>
                     )}
                     {error && (
-                        <div className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 px-3 py-1.5 rounded-lg max-w-[180px] sm:max-w-xs truncate">
+                        <div className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 px-3 py-1.5 rounded-lg max-w-[220px] sm:max-w-sm">
                             {error}
                         </div>
                     )}
@@ -629,45 +402,119 @@ const InterviewChat = () => {
                     ) : (
                         <>
                             <div className="flex flex-col items-center gap-3">
+                                {/* Toggle mic button — click once to start, click again to stop */}
                                 <button
-                                    onMouseDown={startRecording}
-                                    onMouseUp={stopRecording}
-                                    onTouchStart={(e) => { e.preventDefault(); startRecording(); }}
-                                    onTouchEnd={(e) => { e.preventDefault(); stopRecording(); }}
-                                    disabled={isLoading || isSpeaking}
-                                    className={`relative w-24 h-24 rounded-full flex items-center justify-center transition-all select-none ${isRecording
-                                        ? "bg-[#6C63FF] scale-110 shadow-[0_0_40px_rgba(108,99,255,0.6)]"
-                                        : (isLoading || isSpeaking)
-                                            ? "bg-[#6C63FF]/30 cursor-not-allowed"
-                                            : "bg-[#13151F] border-2 border-[#6C63FF]/40 hover:border-[#6C63FF] hover:bg-[#6C63FF]/10"
+                                    onClick={toggleRecording}
+                                    disabled={micState === "loading" || micState === "speaking"}
+                                    className={`relative w-24 h-24 rounded-full flex items-center justify-center transition-all select-none
+                                        ${micState === "recording"
+                                            ? "bg-[#6C63FF] scale-110 shadow-[0_0_40px_rgba(108,99,255,0.6)]"
+                                            : micState === "loading" || micState === "speaking"
+                                                ? "bg-[#6C63FF]/30 cursor-not-allowed"
+                                                : "bg-[#13151F] border-2 border-[#6C63FF]/40 hover:border-[#6C63FF] hover:bg-[#6C63FF]/10"
                                         }`}
-                                    title="Hold to speak"
+                                    title={isRecording ? "Click to stop recording" : "Click to start recording"}
                                 >
-                                    {isRecording && (
+                                    {micState === "recording" && (
                                         <span className="absolute inset-0 rounded-full bg-[#6C63FF]/30 animate-ping" />
                                     )}
-                                    <svg
-                                        className={`w-10 h-10 transition-colors ${isRecording ? "text-white" : "text-[#6C63FF]"
-                                            }`}
-                                        fill="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm0 2a2 2 0 0 0-2 2v6a2 2 0 0 0 4 0V5a2 2 0 0 0-2-2zm6.364 5.636a1 1 0 0 1 1.414 1.414A8.966 8.966 0 0 1 13 17.945V20h2a1 1 0 1 1 0 2H9a1 1 0 1 1 0-2h2v-2.055A8.966 8.966 0 0 1 4.222 10.05a1 1 0 1 1 1.414-1.414 7 7 0 0 0 12.728 0z" />
-                                    </svg>
+                                    {micState === "recording" ? (
+                                        // Stop icon when recording
+                                        <svg className="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                            <rect x="6" y="6" width="12" height="12" rx="2" />
+                                        </svg>
+                                    ) : (
+                                        // Mic icon when idle
+                                        <svg
+                                            className={`w-10 h-10 transition-colors ${micState === "loading" || micState === "speaking" ? "text-[#6C63FF]/40" : "text-[#6C63FF]"}`}
+                                            fill="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path d="M12 1a4 4 0 0 1 4 4v6a4 4 0 0 1-8 0V5a4 4 0 0 1 4-4zm0 2a2 2 0 0 0-2 2v6a2 2 0 0 0 4 0V5a2 2 0 0 0-2-2zm6.364 5.636a1 1 0 0 1 1.414 1.414A8.966 8.966 0 0 1 13 17.945V20h2a1 1 0 1 1 0 2H9a1 1 0 1 1 0-2h2v-2.055A8.966 8.966 0 0 1 4.222 10.05a1 1 0 1 1 1.414-1.414 7 7 0 0 0 12.728 0z" />
+                                        </svg>
+                                    )}
                                 </button>
                                 <p className="text-sm text-[#8B89A0]">
-                                    {isRecording ? "Listening..." : isLoading ? "Processing..." : isSpeaking ? "AI is speaking..." : "Tap and hold to speak"}
+                                    {micState === "recording"
+                                        ? "Recording — click to stop"
+                                        : micState === "loading"
+                                            ? "Processing..."
+                                            : micState === "speaking"
+                                                ? "AI is speaking..."
+                                                : "Click mic to speak"}
                                 </p>
                             </div>
 
+                            {/* Text input as alternative to voice */}
+                            <form onSubmit={sendMessage} className="flex w-full gap-2">
+                                <input
+                                    type="text"
+                                    value={input}
+                                    onChange={(e) => setInput(e.target.value)}
+                                    placeholder="Or type your answer..."
+                                    disabled={isLoading || isRecording}
+                                    className="flex-1 bg-[#13151F] border border-white/[0.08] rounded-full px-4 py-3 text-sm text-white placeholder-[#8B89A0] focus:outline-none focus:border-[#6C63FF]/50 disabled:opacity-50"
+                                />
+                                <button
+                                    type="submit"
+                                    disabled={!input.trim() || isLoading || isRecording}
+                                    className="px-5 py-3 bg-[#6C63FF] hover:bg-[#5B54E8] disabled:opacity-40 text-white rounded-full text-sm font-medium transition-all"
+                                >
+                                    Send
+                                </button>
+                            </form>
+
                             <button
                                 onClick={endSession}
-                                className="px-6 py-3 mt-4 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 font-semibold rounded-full text-sm transition-all flex items-center gap-2"
+                                className="px-6 py-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 font-semibold rounded-full text-sm transition-all flex items-center gap-2"
                             >
                                 <span>📵</span> End Interview
                             </button>
                         </>
                     )}
+                </div>
+
+                {/* Transcript */}
+                <div className="w-full max-w-2xl mt-8 space-y-3 pb-8">
+                    {messages.map((msg, i) => (
+                        <div
+                            key={i}
+                            className={`flex gap-3 ${msg.role === "user" ? "flex-row-reverse" : "flex-row"}`}
+                        >
+                            <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+                                <img
+                                    src={msg.role === "assistant" ? aiAvatar : userAvatar}
+                                    alt={msg.role}
+                                    className="w-full h-full object-cover"
+                                />
+                            </div>
+                            <div
+                                className={`max-w-[75%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${msg.role === "assistant"
+                                    ? "bg-[#13151F] border border-white/[0.08] text-white"
+                                    : "bg-[#6C63FF]/20 border border-[#6C63FF]/20 text-white"
+                                    }`}
+                            >
+                                {msg.content}
+                            </div>
+                        </div>
+                    ))}
+                    {isLoading && (
+                        <div className="flex gap-3">
+                            <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0">
+                                <img src={aiAvatar} alt="AI" className="w-full h-full object-cover" />
+                            </div>
+                            <div className="bg-[#13151F] border border-white/[0.08] px-4 py-3 rounded-2xl flex items-center gap-1.5">
+                                {[0, 150, 300].map((d) => (
+                                    <div
+                                        key={d}
+                                        className="w-1.5 h-1.5 rounded-full bg-[#6C63FF] animate-bounce"
+                                        style={{ animationDelay: `${d}ms` }}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                    <div ref={messagesEndRef} />
                 </div>
             </div>
         </div>

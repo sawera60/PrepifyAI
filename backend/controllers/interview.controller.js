@@ -71,12 +71,27 @@ export const createCustomInterview = async (req, res) => {
     try {
         const { title, category, difficulty, experience, techStack } = req.body;
 
+        // Map AI generated values to strict Enums to prevent Mongoose Validation Errors
+        let mappedDifficulty = "Medium";
+        if (difficulty) {
+            const d = difficulty.toLowerCase();
+            if (d.includes("easy") || d.includes("beginner")) mappedDifficulty = "Easy";
+            else if (d.includes("hard") || d.includes("expert") || d.includes("advanced")) mappedDifficulty = "Hard";
+        }
+
+        let mappedExperience = "Mid";
+        if (experience) {
+            const e = experience.toLowerCase();
+            if (e.includes("junior") || e.includes("entry")) mappedExperience = "Junior";
+            else if (e.includes("senior") || e.includes("lead") || e.includes("expert")) mappedExperience = "Senior";
+        }
+
         const interview = new Interview({
-            title,
-            category,
-            difficulty,
-            experience,
-            techStack: Array.isArray(techStack) ? techStack : [techStack],
+            title: title || "Custom Interview",
+            category: category || "General",
+            difficulty: mappedDifficulty,
+            experience: mappedExperience,
+            techStack: Array.isArray(techStack) ? techStack : techStack ? [techStack] : [],
             type: "custom",
             generatedFrom: "custom",
             isPublic: false,
@@ -92,8 +107,8 @@ export const createCustomInterview = async (req, res) => {
         });
 
     } catch (error) {
-        console.error("Error creating custom interview:", error.message);
-        return res.status(500).json({ message: "Internal server error" });
+        console.error("Error creating custom interview FULL:", error);
+        return res.status(500).json({ message: "Internal server error: " + error.message });
     }
 };
 

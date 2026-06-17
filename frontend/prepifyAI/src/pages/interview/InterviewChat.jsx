@@ -469,11 +469,17 @@ const InterviewChat = () => {
     const startRecording = async () => {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            const recorder = new MediaRecorder(stream);
+            // Use a supported MIME type — webm/opus is supported in Chrome/Edge, ogg/opus in Firefox
+            const mimeType = MediaRecorder.isTypeSupported("audio/webm;codecs=opus")
+                ? "audio/webm;codecs=opus"
+                : MediaRecorder.isTypeSupported("audio/webm")
+                ? "audio/webm"
+                : "audio/ogg";
+            const recorder = new MediaRecorder(stream, { mimeType });
             const chunks = [];
             recorder.ondataavailable = (e) => chunks.push(e.data);
             recorder.onstop = async () => {
-                const blob = new Blob(chunks, { type: "audio/webm" });
+                const blob = new Blob(chunks, { type: recorder.mimeType });
                 await sendAudio(blob);
             };
             recorder.start();
@@ -504,7 +510,9 @@ const InterviewChat = () => {
         setError("");
         try {
             const formData = new FormData();
-            formData.append("audio", blob);
+            // Use blob.type to pick the right file extension (webm on Chrome, ogg on Firefox)
+            const ext = blob.type.includes("ogg") ? "ogg" : "webm";
+            formData.append("audio", blob, `recording.${ext}`);
             const res = await api.post(`/sessions/${sessionId}/voice-message`, formData);
             if (res.data.userText) {
                 setMessages((prev) => [...prev, { role: "user", content: res.data.userText }]);

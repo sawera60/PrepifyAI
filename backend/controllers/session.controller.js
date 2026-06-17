@@ -187,13 +187,22 @@ export const voiceMessageToSession = async (req, res) => {
         }
 
         // 2. Audio buffer from multer
+        if (!req.file || !req.file.buffer) {
+            return res.status(400).json({ message: "No audio file received" });
+        }
         const audioBuffer = req.file.buffer;
+        const mimeType = req.file.mimetype || "audio/webm";
+        console.log(`📥 Voice message received — size: ${audioBuffer.length} bytes, mimetype: ${mimeType}`);
+
+        if (audioBuffer.length < 100) {
+            return res.status(400).json({ message: "Audio too short — please speak for at least 1 second" });
+        }
 
         // 3. Speech → Text (Deepgram)
-        const userText = await transcribeAudio(audioBuffer);
+        const userText = await transcribeAudio(audioBuffer, mimeType);
 
-        if (!userText) {
-            return res.status(400).json({ message: "Could not transcribe audio" });
+        if (!userText || !userText.trim()) {
+            return res.status(400).json({ message: "Could not transcribe audio. Please speak clearly and try again." });
         }
 
         // 4. Save user message

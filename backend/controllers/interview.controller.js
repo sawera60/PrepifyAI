@@ -23,14 +23,21 @@ export const getMockInterviews = async (req, res) => {
 // POST /api/interviews/transcribe  — used by CustomInterviewSetup voice flow
 export const transcribeVoice = async (req, res) => {
     try {
-        if (!req.file) {
+        if (!req.file || !req.file.buffer) {
             return res.status(400).json({ message: "No audio file uploaded" });
         }
         const audioBuffer = req.file.buffer;
-        const transcript = await transcribeAudio(audioBuffer);
+        const mimeType = req.file.mimetype || "audio/webm";
+        console.log(`📥 Custom setup transcribe — size: ${audioBuffer.length} bytes, type: ${mimeType}`);
+
+        if (audioBuffer.length < 100) {
+            return res.status(400).json({ message: "Audio too short — please speak for at least 1 second" });
+        }
+
+        const transcript = await transcribeAudio(audioBuffer, mimeType);
 
         if (!transcript || !transcript.trim()) {
-            return res.status(400).json({ message: "Could not transcribe audio" });
+            return res.status(400).json({ message: "Could not transcribe audio. Please speak clearly and try again." });
         }
 
         return res.status(200).json({ transcript });

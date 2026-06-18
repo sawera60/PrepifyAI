@@ -57,6 +57,15 @@ app.get("/", (req, res) => {
 
 
 
+// Global Error Handling Middleware
+app.use((err, req, res, next) => {
+    console.error("❌ Unhandled Error:", err.stack || err.message || err);
+    res.status(err.status || 500).json({
+        success: false,
+        message: err.message || "Internal Server Error",
+    });
+});
+
 // Server Start
 
 const startServer = async () => {
@@ -71,7 +80,9 @@ const startServer = async () => {
         }
     } catch (error) {
         console.error("❌ Database connection failed:", error.message);
-        process.exit(1);
+        if (!process.env.VERCEL) {
+            process.exit(1);
+        }
     }
 };
 

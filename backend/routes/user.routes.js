@@ -12,10 +12,22 @@ router.post("/signin", signIn); //POST /api/auth/signin
 router.post("/refresh", refreshToken);
 router.post("/logout", logout);
 
+// Helper middleware to check if Google OAuth is configured
+const verifyGoogleConfig = (req, res, next) => {
+    if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+        return res.status(500).json({
+            success: false,
+            message: "Google OAuth credentials are missing in the server environment. Google Sign-In is not configured."
+        });
+    }
+    next();
+};
+
 //Google Auth 
 // Step 1: Redirect to Google
 router.get(
     "/google",
+    verifyGoogleConfig,
     passport.authenticate("google", {
         scope: ["profile", "email"],
         session: false,
@@ -25,6 +37,7 @@ router.get(
 // Step 2: Google callback
 router.get(
     "/google/callback",
+    verifyGoogleConfig,
     passport.authenticate("google", {
         failureRedirect: process.env.CLIENT_URL ? `${process.env.CLIENT_URL}/login` : "http://localhost:5173/login",
         session: false,

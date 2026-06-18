@@ -15,18 +15,17 @@ import profileRouter from "./routes/profile.routes.js";
 import paymentRouter from "./routes/payment.routes.js";
 
 const app = express();
-const port = process.env.PORT || 8000;
+const port = process.env.PORT || 5000;
 
-// Trust proxy is required for express-session to set secure cookies on Vercel
+// Trust Vercel's proxy so secure cookies and https:// work correctly
 app.set("trust proxy", 1);
 
-//Middlewares
-
+// Core middlewares
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-// CORS (frontend connection)
+// CORS
 app.use(
     cors({
         origin: process.env.CLIENT_URL || "http://localhost:5173",
@@ -34,37 +33,41 @@ app.use(
     })
 );
 
-// Passport (stateless — no session needed on Vercel)
+// Passport (stateless JWT — no session)
 app.use(passport.initialize());
 
-// ✅ Per-request DB connection middleware (critical for Vercel serverless)
-// On Vercel each request may hit a cold function — we must ensure the DB
-// is connected before processing ANY route. The cached readyState check in
-// db.js means this is a no-op on warm invocations (no performance cost).
+// ─── DB Connection Middleware ────────────────────────────────────────────────
+// On Vercel every cold-start needs a fresh DB connection.
+// SKIP for GET /api/auth/google — that route just redirects to Google and does
+// NOT touch the database. Blocking it on a DB connection causes crashes.
+// All other routes (including the OAuth callback) DO need the DB.
 app.use(async (req, res, next) => {
+    // Pure OAuth redirect — no DB needed, skip
+    if (req.method === "GET" && req.path === "/api/auth/google") {
+        return next();
+    }
     try {
         await connectDB();
         next();
     } catch (err) {
-        console.error("❌ DB connection failed on request:", err.message);
-        return res.status(500).json({ success: false, message: "Database connection failed" });
+        console.error("❌ DB connection failed:", err.message);
+        return res.status(500).json({ success: false, message: "Database unavailable. Please try again." });
     }
 });
+// ────────────────────────────────────────────────────────────────────────────
 
 // Routes
-app.use("/api/auth", userRouter);  // POST Api for signin signup and google auth
-app.use("/api/interviews", interviewRouter); //GET Api for mock interview
-app.use("/api/sessions", sessionRouter); //POST Api for sessions
-app.use("/api/users", profileRouter); //GET/PUT/DELETE Api for user profile & settings
-app.use("/api/payment", paymentRouter); //POST Api for Stripe payments
+app.use("/api/auth", userRouter);
+app.use("/api/interviews", interviewRouter);
+app.use("/api/sessions", sessionRouter);
+app.use("/api/users", profileRouter);
+app.use("/api/payment", paymentRouter);
 
 app.get("/", (req, res) => {
     res.send("PrepifyAI Backend is running!");
 });
 
-
-
-// Global Error Handling Middleware
+// Global error handler — catches anything that slips through
 app.use((err, req, res, next) => {
     console.error("❌ Unhandled Error:", err.stack || err.message || err);
     res.status(err.status || 500).json({
@@ -73,11 +76,13 @@ app.use((err, req, res, next) => {
     });
 });
 
-// Local dev server start (skipped on Vercel — DB is handled per-request above)
+// ─── Local Dev Server ────────────────────────────────────────────────────────
+// Vercel does NOT call this — it imports `app` directly.
+// Locally, we connect to DB first then start listening.
 if (!process.env.VERCEL) {
     connectDB()
         .then(() => {
-            app.listen(port, '0.0.0.0', () => {
+            app.listen(port, "0.0.0.0", () => {
                 console.log(`🚀 Server running on port ${port}`);
             });
         })

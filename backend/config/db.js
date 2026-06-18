@@ -1,25 +1,24 @@
 import mongoose from "mongoose";
 import dns from "dns";
 
-// Only override DNS servers locally, never on Vercel or in production
-if (process.env.NODE_ENV !== "production" && !process.env.VERCEL) {
+// Only override DNS locally (Windows DNS fix). Never on Vercel/production.
+if (!process.env.VERCEL && process.env.NODE_ENV !== "production") {
     try {
         dns.setServers(["8.8.8.8", "1.1.1.1"]);
-    } catch (dnsErr) {
-        console.warn("Could not set custom DNS servers, using system defaults:", dnsErr.message);
+    } catch (e) {
+        console.warn("Could not override DNS servers:", e.message);
     }
 }
 
 const connectDB = async () => {
-    if (mongoose.connection.readyState >= 1) {
-        return;
-    }
-    try {
-        await mongoose.connect(process.env.MONGODB_URL);
-        console.log("Database connected");
-    } catch (error) {
-        console.error("error while connecting", error.message);
-        throw error;
-    }
+    // Reuse existing connection if alive (critical for Vercel warm invocations)
+    if (mongoose.connection.readyState >= 1) return;
+
+    await mongoose.connect(process.env.MONGODB_URL, {
+        serverSelectionTimeoutMS: 8000, // Fail fast — don't hang Vercel for 30s
+        socketTimeoutMS: 10000,
+    });
+    console.log("✅ Database connected");
 };
+
 export default connectDB;

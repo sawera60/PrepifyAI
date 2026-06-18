@@ -26,10 +26,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-
-
 // CORS (frontend connection)
-
 app.use(
     cors({
         origin: process.env.CLIENT_URL || "http://localhost:5173",
@@ -37,14 +34,24 @@ app.use(
     })
 );
 
-
 // Passport (stateless — no session needed on Vercel)
 app.use(passport.initialize());
 
-
+// ✅ Per-request DB connection middleware (critical for Vercel serverless)
+// On Vercel each request may hit a cold function — we must ensure the DB
+// is connected before processing ANY route. The cached readyState check in
+// db.js means this is a no-op on warm invocations (no performance cost).
+app.use(async (req, res, next) => {
+    try {
+        await connectDB();
+        next();
+    } catch (err) {
+        console.error("❌ DB connection failed on request:", err.message);
+        return res.status(500).json({ success: false, message: "Database connection failed" });
+    }
+});
 
 // Routes
-
 app.use("/api/auth", userRouter);  // POST Api for signin signup and google auth
 app.use("/api/interviews", interviewRouter); //GET Api for mock interview
 app.use("/api/sessions", sessionRouter); //POST Api for sessions
@@ -66,26 +73,18 @@ app.use((err, req, res, next) => {
     });
 });
 
-// Server Start
-
-const startServer = async () => {
-    try {
-        await connectDB();
-
-        // Only call app.listen if not running on Vercel
-        if (!process.env.VERCEL) {
+// Local dev server start (skipped on Vercel — DB is handled per-request above)
+if (!process.env.VERCEL) {
+    connectDB()
+        .then(() => {
             app.listen(port, '0.0.0.0', () => {
                 console.log(`🚀 Server running on port ${port}`);
             });
-        }
-    } catch (error) {
-        console.error("❌ Database connection failed:", error.message);
-        if (!process.env.VERCEL) {
+        })
+        .catch((err) => {
+            console.error("❌ Database connection failed:", err.message);
             process.exit(1);
-        }
-    }
-};
-
-startServer();
+        });
+}
 
 export default app;

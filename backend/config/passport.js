@@ -27,7 +27,16 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
             {
                 clientID: process.env.GOOGLE_CLIENT_ID,
                 clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-                callbackURL: process.env.GOOGLE_CALLBACK_URL || "/api/auth/google/callback",
+                // Use GOOGLE_CALLBACK_URL if explicitly set (e.g. during local dev or if you want to pin it).
+                // Otherwise fall back to the production backend URL built from env, or a localhost default.
+                // ⚠️ Never use a bare relative path like "/api/..." — passport-google-oauth20 needs a full URL.
+                callbackURL: process.env.GOOGLE_CALLBACK_URL
+                    || (process.env.BACKEND_URL
+                        ? `${process.env.BACKEND_URL}/api/auth/google/callback`
+                        : "http://localhost:5000/api/auth/google/callback"),
+                // Tell Passport to trust the X-Forwarded-Proto header set by Vercel's proxy.
+                // This ensures the callback URL resolves as https:// in production.
+                proxy: true,
             },
             async (accessToken, refreshToken, profile, done) => {
                 try {

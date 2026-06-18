@@ -62,7 +62,7 @@ const CustomInterviewSetup = () => {
       
       const pickVoice = () => {
           const voices = window.speechSynthesis.getVoices();
-          const preferred = ["Google UK English Female", "Google US English", "Microsoft Aria Online (Natural)", "Samantha"];
+          const preferred = ["Google UK English Female", "Microsoft Aria Online (Natural)", "Microsoft Zira - English (United States)", "Samantha", "Google US English Female"];
           const picked = preferred.map((name) => voices.find((v) => v.name === name)).find(Boolean);
           if (picked) utterance.voice = picked;
       };

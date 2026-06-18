@@ -9,7 +9,12 @@ const MockInterviewList = () => {
             {/* Section Header */}
             <div className="flex items-center justify-between mb-4">
                 <h2 className="font-syne text-xl font-bold text-white flex items-center gap-2">
-                    <span>🎯</span> Mock Interviews
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6C63FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <circle cx="12" cy="12" r="6" />
+                        <circle cx="12" cy="12" r="2" />
+                    </svg>
+                    Mock Interviews
                 </h2>
             </div>
 

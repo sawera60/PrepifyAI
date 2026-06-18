@@ -13,7 +13,13 @@ const MyInterview = () => {
             {/* Section Header */}
             <div className="flex items-center justify-between mb-4">
                 <h2 className="font-syne text-xl font-bold text-white flex items-center gap-2">
-                    <span>📋</span> Your Interviews
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6C63FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+                        <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
+                        <path d="M9 14h6" />
+                        <path d="M9 18h6" />
+                    </svg>
+                    Your Interviews
                 </h2>
                 <button className="text-xs text-[#8B89A0] hover:text-white border border-white/[0.08] hover:border-white/[0.15] rounded-lg px-3.5 py-1.5 transition-all duration-150">
                     View All
@@ -22,7 +28,7 @@ const MyInterview = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
                 {myInterviews && myInterviews.length > 0 ? (
-                    <div className="bg-[#13151F] border border-white/[0.06] rounded-2xl p-5 flex flex-col justify-between min-h-[160px]">
+                    <div className="bg-[#13151F] border border-white/[0.06] rounded-2xl p-5 flex flex-col min-h-[160px]">
                         <h3 className="text-[#8B89A0] font-semibold text-xs uppercase tracking-wider mb-3">Custom Generated</h3>
                         <div className="space-y-3.5 max-h-[160px] overflow-y-auto pr-1">
                             {myInterviews.map((interview) => (
@@ -32,8 +38,12 @@ const MyInterview = () => {
                                     onClick={() => navigate(`/interview/${interview._id}`)}
                                 >
                                     <div className="flex items-center gap-3">
-                                        <div className="w-8 h-8 rounded-lg bg-[#6C63FF]/15 flex items-center justify-center text-[#9F9BFF] text-sm font-bold">
-                                            💻
+                                        <div className="w-8 h-8 rounded-lg bg-[#6C63FF]/15 flex items-center justify-center text-[#9F9BFF]">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+                                                <line x1="8" y1="21" x2="16" y2="21" />
+                                                <line x1="12" y1="17" x2="12" y2="21" />
+                                            </svg>
                                         </div>
                                         <div className="min-w-0">
                                             <h4 className="text-white font-medium text-sm truncate max-w-[170px]">{interview.title}</h4>
@@ -83,7 +93,13 @@ const MyInterview = () => {
                 <div className="bg-[#13151F] border border-white/[0.06] rounded-2xl p-5">
                     <div className="flex items-center justify-between mb-4">
                         <h3 className="font-syne text-base font-bold text-white flex items-center gap-2">
-                            <span>📄</span> Resume Overview
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6C63FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                                <polyline points="14 2 14 8 20 8" />
+                                <line x1="16" y1="13" x2="8" y2="13" />
+                                <line x1="16" y1="17" x2="8" y2="17" />
+                            </svg>
+                            Resume Overview
                         </h3>
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5A5870" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <polyline points="9 18 15 12 9 6" />

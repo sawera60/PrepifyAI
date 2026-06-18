@@ -1,4 +1,4 @@
-import { getAIResponse } from "./openrouter.js";
+import { getAIResponse } from "./groq.js";
 export const generateAnalysis = async ({ transcript, interview }) => {
   // Build a readable transcript string for the AI
   const transcriptText = transcript
@@ -23,7 +23,12 @@ The JSON must follow this exact structure:
     "problemSolving": <0-100>,
     "clarity": <0-100>
   }
-}`,
+}
+
+CRITICAL RULES:
+1. Base your evaluation ONLY on the candidate's actual responses in the transcript.
+2. If the candidate did not answer any questions, ended the interview early without providing substantial technical answers, or if the transcript only contains greetings/questions from the interviewer, you MUST assign an overall score of 0 and 0 for all dimensions.
+3. In such cases (score of 0), the feedback should clearly state that the interview was incomplete or no answers were provided, and list "None" or "Not enough data" for strengths.`,
     },
     {
       role: "user",

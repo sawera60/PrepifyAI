@@ -1,7 +1,16 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import useUserStore from "../../store/userStore";
 
 const DashboardHeader = ({ onMenuToggle }) => {
     const navigate = useNavigate();
+    const { user, fetchUser } = useUserStore();
+
+    useEffect(() => {
+        if (!user) {
+            fetchUser();
+        }
+    }, [user, fetchUser]);
     return (
         <header className="font-dm flex items-center justify-between px-4 sm:px-6 py-3 border-b border-white/[0.06]">
             {/* Left — Hamburger (mobile) + Greeting */}
@@ -18,7 +27,7 @@ const DashboardHeader = ({ onMenuToggle }) => {
                     </svg>
                 </button>
                 <h1 className="font-syne text-lg sm:text-xl font-bold text-white tracking-tight">
-                    Welcome back! 👋
+                    Welcome back{user?.firstName ? `, ${user.firstName}` : ''}! 👋
                 </h1>
             </div>
 
@@ -44,7 +53,7 @@ const DashboardHeader = ({ onMenuToggle }) => {
 
                 {/* Avatar */}
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#6C63FF] to-[#4ECDC4] flex items-center justify-center text-white text-sm font-bold cursor-pointer ring-2 ring-white/[0.08] hover:ring-[#6C63FF]/40 transition-all duration-200">
-                    U
+                    {user ? user.firstName?.[0]?.toUpperCase() || "U" : "U"}
                 </div>
             </div>
         </header>

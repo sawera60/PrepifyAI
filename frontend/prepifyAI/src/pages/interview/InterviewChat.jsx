@@ -8,8 +8,7 @@ const InterviewChat = () => {
     const { interviewId } = useParams();
     const navigate = useNavigate();
 
-    const [messages, setMessages] = useState([]);
-    const [input, setInput] = useState("");
+    const [streamingText, setStreamingText] = useState("");
     const [sessionId, setSessionId] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
@@ -20,11 +19,6 @@ const InterviewChat = () => {
     const audioChunksRef = useRef([]);
     const streamRef = useRef(null);
     const currentAudioRef = useRef(null);
-    const messagesEndRef = useRef(null);
-
-    useEffect(() => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    }, [messages, isLoading]);
 
     // -----------------------------
     // 🔊 PLAY DEEPGRAM AUDIO (base64)
@@ -74,14 +68,7 @@ const InterviewChat = () => {
 
             const pickVoice = () => {
                 const voices = window.speechSynthesis.getVoices();
-                const preferred = [
-                    "Google UK English Female",
-                    "Google US English",
-                    "Microsoft Aria Online (Natural)",
-                    "Microsoft Jenny Online (Natural)",
-                    "Samantha",
-                    "Karen",
-                ];
+                const preferred = ["Google UK English Female", "Microsoft Aria Online (Natural)", "Microsoft Zira - English (United States)", "Samantha", "Google US English Female"];
                 const picked = preferred
                     .map((name) => voices.find((v) => v.name === name))
                     .find(Boolean);
@@ -138,10 +125,11 @@ const InterviewChat = () => {
 
             setError("");
             setIsLoading(true);
+            setStreamingText("");
             const res = await api.post(`/sessions/start`, { interviewId });
             setSessionId(res.data.sessionId);
             if (res.data.firstMessage) {
-                setMessages([{ role: "assistant", content: res.data.firstMessage }]);
+                setStreamingText(res.data.firstMessage);
                 // Play Deepgram Aura audio if backend returned it, else fallback
                 playAudio(res.data.audio, res.data.firstMessage);
             }
@@ -153,40 +141,7 @@ const InterviewChat = () => {
         }
     };
 
-    // -----------------------------
-    // TEXT MESSAGE
-    // -----------------------------
-    const sendMessage = async (e) => {
-        e.preventDefault();
-        if (!input.trim() || !sessionId) return;
-
-        const unlock = new SpeechSynthesisUtterance("");
-        window.speechSynthesis.speak(unlock);
-
-        const userMsg = { role: "user", content: input };
-        setMessages((prev) => [...prev, userMsg]);
-        setInput("");
-        setIsLoading(true);
-        setError("");
-
-        try {
-            const res = await api.post(`/sessions/${sessionId}/message`, {
-                message: userMsg.content,
-            });
-            const { isComplete, cleanReply } = checkInterviewComplete(res.data.reply);
-            setMessages((prev) => [...prev, { role: "assistant", content: cleanReply }]);
-
-            // Play Deepgram Aura audio if backend returned it, else fallback
-            playAudio(res.data.audio, cleanReply);
-
-            if (isComplete) setTimeout(() => endSession(), 3000);
-        } catch (err) {
-            const msg = err?.response?.data?.message || err?.message || "Failed to send message.";
-            setError(`[${err?.response?.status || "ERR"}] ${msg}`);
-        } finally {
-            setIsLoading(false);
-        }
-    };
+    // Text messaging removed in favor of voice-only flow.
 
     // -----------------------------
     // 🎤 TOGGLE RECORDING
@@ -262,35 +217,74 @@ const InterviewChat = () => {
 
         setIsLoading(true);
         setError("");
+        setStreamingText("");
 
         try {
             const formData = new FormData();
             const ext = (mimeType || blob.type).includes("ogg") ? "ogg" : "webm";
             formData.append("audio", blob, `recording.${ext}`);
 
-            const res = await api.post(`/sessions/${sessionId}/voice-message`, formData);
+            const response = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:8000/api"}/sessions/${sessionId}/voice-message`, {
+                method: "POST",
+                body: formData,
+                credentials: "include"
+            });
 
-            if (res.data.userText) {
-                setMessages((prev) => [
-                    ...prev,
-                    { role: "user", content: res.data.userText },
-                ]);
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || "Voice message failed.");
             }
 
-            const { isComplete, cleanReply } = checkInterviewComplete(res.data.reply);
-            setMessages((prev) => [
-                ...prev,
-                { role: "assistant", content: cleanReply },
-            ]);
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder("utf-8");
+            let done = false;
+            let fullText = "";
+            let audioBase64 = null;
+            let buffer = "";
 
-            // Play Deepgram Aura audio if backend returned it, else fallback
-            playAudio(res.data.audio, cleanReply);
+            setIsLoading(false); // Stop loading spinner, text streaming will begin
+
+            while (!done) {
+                const { value, done: readerDone } = await reader.read();
+                done = readerDone;
+                if (value) {
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split("\n");
+                    buffer = lines.pop(); // keep last partial line
+
+                    for (const line of lines) {
+                        if (line.startsWith("data: ")) {
+                            try {
+                                const data = JSON.parse(line.substring(6));
+                                if (data.type === "token") {
+                                    setStreamingText(prev => prev + data.content);
+                                } else if (data.type === "userText") {
+                                    setStreamingText(`(You: ${data.content})`);
+                                    setTimeout(() => setStreamingText(""), 1500);
+                                } else if (data.type === "done") {
+                                    fullText = data.fullText;
+                                    audioBase64 = data.audio;
+                                } else if (data.type === "error") {
+                                    throw new Error(data.message);
+                                }
+                            } catch (e) {
+                                // ignore parse error for incomplete JSON chunk
+                            }
+                        }
+                    }
+                }
+            }
+
+            const { isComplete, cleanReply } = checkInterviewComplete(fullText);
+            setStreamingText(cleanReply);
+
+            // Play Deepgram Aura audio
+            playAudio(audioBase64, cleanReply);
 
             if (isComplete) setTimeout(() => endSession(), 3000);
         } catch (err) {
-            const msg = err?.response?.data?.message || err?.message || "Voice message failed.";
-            setError(`[${err?.response?.status || "ERR"}] ${msg}`);
-        } finally {
+            const msg = err.message || "Voice message failed.";
+            setError(`[ERR] ${msg}`);
             setIsLoading(false);
         }
     };
@@ -392,8 +386,17 @@ const InterviewChat = () => {
                     </div>
                 </div>
 
+                {/* Streaming Text Pill */}
+                {(streamingText || isLoading) && (
+                    <div className="w-full max-w-2xl mt-8 mb-2 px-4 flex justify-center">
+                        <p className="text-[#B8B6C8] text-sm sm:text-base text-center leading-relaxed transition-opacity duration-300">
+                            {isLoading ? "Thinking..." : streamingText}
+                        </p>
+                    </div>
+                )}
+
                 {/* Action buttons */}
-                <div className="flex flex-col items-center gap-6 mt-12 w-full max-w-md">
+                <div className="flex flex-col items-center gap-6 mt-8 w-full max-w-md">
                     {!sessionId ? (
                         <button
                             onClick={startSession}

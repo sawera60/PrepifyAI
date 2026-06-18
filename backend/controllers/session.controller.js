@@ -1,6 +1,6 @@
 import Session from "../models/session.model.js";
 import promptBuilder from "../utils/promptBuilder.js";
-import { getAIResponse } from "../services/openrouter.js";
+import { getAIResponse, getAIResponseStream } from "../services/groq.js";
 import { transcribeAudio } from "../services/deepgram.js";
 import { auraTextToSpeech } from "../services/deepgramTTS.js";
 import { Analysis } from "../models/analysis.model.js";
@@ -96,8 +96,22 @@ export const addMessageToSession = async (req, res) => {
             transcript: plainTranscript,
         });
 
-        // 5. Get AI response (OPENROUTER)
-        const aiReply = await getAIResponse(messages);
+        // Setup SSE response
+        res.setHeader("Content-Type", "text/event-stream");
+        res.setHeader("Cache-Control", "no-cache");
+        res.setHeader("Connection", "keep-alive");
+
+        // 5. Get AI response stream
+        const stream = await getAIResponseStream(messages);
+        let aiReply = "";
+
+        for await (const chunk of stream) {
+            const content = chunk.choices[0]?.delta?.content || "";
+            if (content) {
+                aiReply += content;
+                res.write(`data: ${JSON.stringify({ type: "token", content })}\n\n`);
+            }
+        }
 
         // Generate TTS audio
         const audioBase64 = await auraTextToSpeech(aiReply);
@@ -110,18 +124,21 @@ export const addMessageToSession = async (req, res) => {
 
         await session.save();
 
-        // 7. Send response
-        return res.status(200).json({
-            reply: aiReply,
-            audio: audioBase64,
-        });
+        // 7. Send final response
+        res.write(`data: ${JSON.stringify({ type: "done", fullText: aiReply, audio: audioBase64 })}\n\n`);
+        res.end();
 
     } catch (error) {
         console.error("Error in addMessageToSession:", error.stack || error);
-        return res.status(500).json({
-            message: "Internal server error",
-            error: error.message,
-        });
+        if (!res.headersSent) {
+            return res.status(500).json({
+                message: "Internal server error",
+                error: error.message,
+            });
+        } else {
+            res.write(`data: ${JSON.stringify({ type: "error", message: "Internal server error" })}\n\n`);
+            res.end();
+        }
     }
 };
 
@@ -213,6 +230,14 @@ export const voiceMessageToSession = async (req, res) => {
             return res.status(400).json({ message: "Could not transcribe audio. Please speak clearly and try again." });
         }
 
+        // Setup SSE response early since we're streaming back now
+        res.setHeader("Content-Type", "text/event-stream");
+        res.setHeader("Cache-Control", "no-cache");
+        res.setHeader("Connection", "keep-alive");
+
+        // Send initial user text so frontend can display it immediately
+        res.write(`data: ${JSON.stringify({ type: "userText", content: userText })}\n\n`);
+
         // 4. Save user message
         session.transcript.push({
             role: "user",
@@ -230,32 +255,43 @@ export const voiceMessageToSession = async (req, res) => {
             transcript: plainTranscript,
         });
 
-        // 6. AI response
-        const aiReply = await getAIResponse(messages);
+        // 6. AI response stream
+        const stream = await getAIResponseStream(messages);
+        let aiReply = "";
 
-        // 7. Save AI message
+        for await (const chunk of stream) {
+            const content = chunk.choices[0]?.delta?.content || "";
+            if (content) {
+                aiReply += content;
+                res.write(`data: ${JSON.stringify({ type: "token", content })}\n\n`);
+            }
+        }
+
+        // 7. Generate TTS
+        const audioBase64 = await auraTextToSpeech(aiReply);
+
+        // 8. Save AI message
         session.transcript.push({
             role: "assistant",
             content: aiReply,
         });
 
-    
-        const audioBase64 = await auraTextToSpeech(aiReply);; 
-
         await session.save();
 
-        // 9. Response
-        return res.status(200).json({
-            userText: userText,
-            reply: aiReply,
-            audio: audioBase64,
-        });
+        // 9. Send final response
+        res.write(`data: ${JSON.stringify({ type: "done", fullText: aiReply, audio: audioBase64 })}\n\n`);
+        res.end();
 
     } catch (error) {
         console.error("Error in voiceMessageToSession:", error?.response?.data || error);
-        return res.status(error?.response?.status || 500).json({
-            message: error?.response?.data?.message || error?.message || "Internal server error",
-        });
+        if (!res.headersSent) {
+            return res.status(error?.response?.status || 500).json({
+                message: error?.response?.data?.message || error?.message || "Internal server error",
+            });
+        } else {
+            res.write(`data: ${JSON.stringify({ type: "error", message: "Internal server error" })}\n\n`);
+            res.end();
+        }
     }
 };
 

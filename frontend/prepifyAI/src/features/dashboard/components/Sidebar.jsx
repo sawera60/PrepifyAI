@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import useUserStore from "../../store/userStore";
 import logo from "../../../assets/logo.png";
 
 const navItems = [
@@ -65,6 +66,14 @@ const iconMap = {
 const Sidebar = ({ mobileOpen, onClose }) => {
     const navigate = useNavigate();
     const location = useLocation();
+
+    const { user, fetchUser } = useUserStore();
+
+    useEffect(() => {
+        if (!user) {
+            fetchUser();
+        }
+    }, [user, fetchUser]);
 
     const handleNav = (path) => {
         if (path.includes("#")) {
@@ -139,11 +148,15 @@ const Sidebar = ({ mobileOpen, onClose }) => {
             <div className="px-4 pb-5 border-t border-white/[0.06] pt-4">
                 <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#6C63FF] to-[#4ECDC4] flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
-                        U
+                        {user ? user.firstName?.[0]?.toUpperCase() || "U" : "U"}
                     </div>
                     <div className="flex-1 min-w-0">
-                        <p className="text-white text-sm font-medium truncate">User</p>
-                        <p className="text-[#5A5870] text-xs">Free Plan</p>
+                        <p className="text-white text-sm font-medium truncate">
+                            {user ? `${user.firstName} ${user.lastName}` : "User"}
+                        </p>
+                        <p className="text-[#5A5870] text-xs">
+                            {user?.plan === "pro" ? "Pro Plan" : "Free Plan"}
+                        </p>
                     </div>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5A5870" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <polyline points="6 9 12 15 18 9" />

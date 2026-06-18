@@ -1,5 +1,5 @@
 import Interview from "../models/interview.model.js";
-import { getAIResponse } from "../services/openrouter.js";
+import { getAIResponse } from "../services/groq.js";
 import { transcribeAudio } from "../services/deepgram.js";
 import { auraTextToSpeech } from "../services/deepgramTTS.js";
 // pdf-parse is loaded dynamically to avoid pdfjs-dist crashing Vercel on startup

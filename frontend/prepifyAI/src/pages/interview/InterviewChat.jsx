@@ -3,10 +3,16 @@ import { useParams, useNavigate } from "react-router-dom";
 import api from "../../services/api";
 import aiAvatar from "../../assets/robot2.png";
 import userAvatar from "../../assets/user.jpeg";
+import useUserStore from "../../features/store/userStore";
 
 const InterviewChat = () => {
     const { interviewId } = useParams();
     const navigate = useNavigate();
+    const { user, fetchUser } = useUserStore();
+
+    useEffect(() => {
+        if (!user) fetchUser();
+    }, [user, fetchUser]);
 
     const [streamingText, setStreamingText] = useState("");
     const [sessionId, setSessionId] = useState(null);
@@ -318,7 +324,7 @@ const InterviewChat = () => {
         <div className="min-h-screen bg-[#0B0D14] font-dm text-white flex flex-col">
 
             {/* Top bar */}
-            <header className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-white/[0.06] flex-wrap gap-2">
+            <header className="flex items-center justify-between px-3 sm:px-6 py-2.5 sm:py-4 border-b border-white/[0.06] gap-2">
                 <div className="flex items-center gap-2">
                     <div className="w-2 h-2 rounded-full bg-[#6C63FF]" />
                     <span className="font-syne font-bold text-sm text-white tracking-wide">PrepifyAI</span>
@@ -331,7 +337,7 @@ const InterviewChat = () => {
                         </div>
                     )}
                     {error && (
-                        <div className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 px-3 py-1.5 rounded-lg max-w-[220px] sm:max-w-sm">
+                        <div className="text-xs text-red-400 bg-red-500/10 border border-red-500/20 px-2.5 py-1 rounded-lg max-w-[180px] sm:max-w-sm truncate">
                             {error}
                         </div>
                     )}
@@ -339,11 +345,11 @@ const InterviewChat = () => {
             </header>
 
             {/* Two-panel call area */}
-            <div className="flex flex-col items-center px-4 sm:px-6 pt-6 sm:pt-8 pb-4">
-                <div className="grid grid-cols-2 gap-3 sm:gap-4 w-full max-w-2xl">
+            <div className="flex flex-col items-center px-3 sm:px-6 pt-4 sm:pt-8 pb-4">
+                <div className="grid grid-cols-2 gap-2.5 sm:gap-4 w-full max-w-2xl">
 
                     {/* AI Interviewer Panel */}
-                    <div className={`relative bg-[#13151F] border rounded-2xl p-4 sm:p-6 flex flex-col items-center gap-3 sm:gap-4 transition-all duration-300 ${isSpeaking ? "border-[#6C63FF]/60 shadow-[0_0_20px_rgba(108,99,255,0.15)]" : "border-white/[0.08]"}`}>
+                    <div className={`relative bg-[#13151F] border rounded-xl sm:rounded-2xl p-3 sm:p-6 flex flex-col items-center gap-2 sm:gap-4 transition-all duration-300 ${isSpeaking ? "border-[#6C63FF]/60 shadow-[0_0_20px_rgba(108,99,255,0.15)]" : "border-white/[0.08]"}`}>
                         {isSpeaking && (
                             <div className="absolute top-2 sm:top-3 right-2 sm:right-3 flex items-center gap-1">
                                 {[0, 150, 300].map((delay) => (
@@ -367,7 +373,7 @@ const InterviewChat = () => {
                     </div>
 
                     {/* User Panel */}
-                    <div className={`relative bg-[#13151F] border rounded-2xl p-4 sm:p-6 flex flex-col items-center gap-3 sm:gap-4 transition-all duration-300 ${isRecording ? "border-red-500/60 shadow-[0_0_20px_rgba(239,68,68,0.15)]" : "border-white/[0.08]"}`}>
+                    <div className={`relative bg-[#13151F] border rounded-xl sm:rounded-2xl p-3 sm:p-6 flex flex-col items-center gap-2 sm:gap-4 transition-all duration-300 ${isRecording ? "border-red-500/60 shadow-[0_0_20px_rgba(239,68,68,0.15)]" : "border-white/[0.08]"}`}>
                         {isRecording && (
                             <div className="absolute top-2 sm:top-3 right-2 sm:right-3 flex items-center gap-1.5">
                                 <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
@@ -375,7 +381,7 @@ const InterviewChat = () => {
                             </div>
                         )}
                         <div className={`w-14 h-14 sm:w-20 sm:h-20 rounded-full overflow-hidden border-2 transition-all duration-300 ${isRecording ? "border-red-500" : "border-white/10"}`}>
-                            <img src={userAvatar} alt="You" className="w-full h-full object-cover" />
+                            <img src={user?.profilePicture || userAvatar} alt="You" className="w-full h-full object-cover" />
                         </div>
                         <div className="text-center">
                             <p className="font-syne font-bold text-xs sm:text-sm text-white">You</p>
@@ -388,20 +394,20 @@ const InterviewChat = () => {
 
                 {/* Streaming Text Pill */}
                 {(streamingText || isLoading) && (
-                    <div className="w-full max-w-2xl mt-8 mb-2 px-4 flex justify-center">
-                        <p className="text-[#B8B6C8] text-sm sm:text-base text-center leading-relaxed transition-opacity duration-300">
+                    <div className="w-full max-w-2xl mt-4 sm:mt-8 mb-2 px-2 sm:px-4 flex justify-center">
+                        <p className="text-[#B8B6C8] text-xs sm:text-base text-center leading-relaxed transition-opacity duration-300">
                             {isLoading ? "Thinking..." : streamingText}
                         </p>
                     </div>
                 )}
 
                 {/* Action buttons */}
-                <div className="flex flex-col items-center gap-6 mt-8 w-full max-w-md">
+                <div className="flex flex-col items-center gap-4 sm:gap-6 mt-4 sm:mt-8 w-full max-w-md">
                     {!sessionId ? (
                         <button
                             onClick={startSession}
                             disabled={isLoading}
-                            className="px-8 py-4 bg-[#6C63FF] hover:bg-[#5B54E8] disabled:opacity-50 text-white font-semibold rounded-full text-base transition-all shadow-lg shadow-[#6C63FF]/20 w-full"
+                            className="px-6 sm:px-8 py-3 sm:py-4 bg-[#6C63FF] hover:bg-[#5B54E8] disabled:opacity-50 text-white font-semibold rounded-full text-sm sm:text-base transition-all shadow-lg shadow-[#6C63FF]/20 w-full"
                         >
                             {isLoading ? "Starting..." : "Start Interview"}
                         </button>
@@ -412,7 +418,7 @@ const InterviewChat = () => {
                                 <button
                                     onClick={toggleRecording}
                                     disabled={micState === "loading" || micState === "speaking"}
-                                    className={`relative w-24 h-24 rounded-full flex items-center justify-center transition-all select-none
+                                    className={`relative w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center transition-all select-none
                                         ${micState === "recording"
                                             ? "bg-[#6C63FF] scale-110 shadow-[0_0_40px_rgba(108,99,255,0.6)]"
                                             : micState === "loading" || micState === "speaking"
@@ -440,7 +446,7 @@ const InterviewChat = () => {
                                         </svg>
                                     )}
                                 </button>
-                                <p className="text-sm text-[#8B89A0]">
+                                <p className="text-xs sm:text-sm text-[#8B89A0]">
                                     {micState === "recording"
                                         ? "Recording — click to stop"
                                         : micState === "loading"
@@ -453,9 +459,9 @@ const InterviewChat = () => {
 
                             <button
                                 onClick={endSession}
-                                className="mt-4 px-6 py-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 font-semibold rounded-full text-sm transition-all flex items-center gap-2"
+                                className="mt-4 px-6 py-3 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-full text-sm transition-all flex items-center justify-center shadow-lg shadow-red-500/20"
                             >
-                                <span>📵</span> End Interview
+                                End Interview
                             </button>
                         </>
                     )}

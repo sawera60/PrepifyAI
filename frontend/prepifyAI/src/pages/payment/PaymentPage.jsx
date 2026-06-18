@@ -478,13 +478,13 @@ const PaymentPage = () => {
                             </div>
 
                             {/* ── Plan Cards ── */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-10">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 mb-8 sm:mb-10">
                                 {plans.map((plan) => {
                                     const isCurrentPlan = currentPlan === plan.id;
                                     return (
                                         <div
                                             key={plan.id}
-                                            className={`relative rounded-2xl border ${isCurrentPlan && plan.id === "pro" ? "border-[#6C63FF]/60" : plan.color} bg-[#13151F] p-6 flex flex-col transition-all duration-200 ${plan.id === "pro" ? "shadow-xl shadow-[#6C63FF]/10" : ""}`}
+                                            className={`relative rounded-2xl border ${isCurrentPlan && plan.id === "pro" ? "border-[#6C63FF]/60" : plan.color} bg-[#13151F] p-4 sm:p-6 flex flex-col transition-all duration-200 ${plan.id === "pro" ? "shadow-xl shadow-[#6C63FF]/10" : ""}`}
                                         >
                                             {/* Glow for pro */}
                                             {plan.id === "pro" && (
@@ -494,7 +494,7 @@ const PaymentPage = () => {
                                             {/* Badge */}
                                             {plan.badge && (
                                                 <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                                                    <span className="px-3 py-1 rounded-full bg-gradient-to-r from-[#6C63FF] to-[#5B53EE] text-white text-xs font-bold shadow-lg shadow-[#6C63FF]/30 flex items-center gap-1">
+                                                    <span className="px-2.5 sm:px-3 py-1 rounded-full bg-gradient-to-r from-[#6C63FF] to-[#5B53EE] text-white text-[10px] sm:text-xs font-bold shadow-lg shadow-[#6C63FF]/30 flex items-center gap-1 whitespace-nowrap">
                                                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
                                                         {plan.badge}
                                                     </span>
@@ -509,7 +509,7 @@ const PaymentPage = () => {
                                                             {plan.name}
                                                         </p>
                                                         <div className="flex items-end gap-1.5">
-                                                            <span className="font-syne text-3xl font-bold text-white">
+                                                            <span className="font-syne text-2xl sm:text-3xl font-bold text-white">
                                                                 ${billingCycle === "yearly" && plan.id === "pro" ? (parseFloat(yearlyPrice) / 12).toFixed(2) : plan.price}
                                                             </span>
                                                             {plan.price !== "0" && (
@@ -604,12 +604,12 @@ const PaymentPage = () => {
                                     <p className="text-[#8B89A0] text-xs mt-0.5">See exactly what's included in each plan</p>
                                 </div>
                                 <div className="overflow-x-auto">
-                                    <table className="w-full text-sm">
+                                    <table className="w-full text-sm min-w-[420px]">
                                         <thead>
                                             <tr className="border-b border-white/[0.04]">
-                                                <th className="px-6 py-3 text-left text-[#8B89A0] text-xs font-semibold uppercase tracking-wider">Feature</th>
-                                                <th className="px-6 py-3 text-center text-[#8B89A0] text-xs font-semibold uppercase tracking-wider">Free</th>
-                                                <th className="px-6 py-3 text-center text-[#9F9BFF] text-xs font-semibold uppercase tracking-wider">Pro</th>
+                                                <th className="px-3 sm:px-6 py-3 text-left text-[#8B89A0] text-xs font-semibold uppercase tracking-wider">Feature</th>
+                                                <th className="px-3 sm:px-6 py-3 text-center text-[#8B89A0] text-xs font-semibold uppercase tracking-wider">Free</th>
+                                                <th className="px-3 sm:px-6 py-3 text-center text-[#9F9BFF] text-xs font-semibold uppercase tracking-wider">Pro</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-white/[0.03]">

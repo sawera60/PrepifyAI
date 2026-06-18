@@ -4,6 +4,7 @@ import Sidebar from "../../features/dashboard/components/Sidebar";
 import DashboardHeader from "../../features/dashboard/components/DashboardHeader";
 import api from "../../services/api";
 import { toast } from "react-toastify";
+import useUserStore from "../../features/store/userStore";
 
 // ─── Section Tab IDs ───────────────────────────────────────────────────────────
 const TABS = [
@@ -226,6 +227,7 @@ const SettingsPage = () => {
     const navigate = useNavigate();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [activeTab, setActiveTab] = useState("profile");
+    const { fetchUser } = useUserStore();
 
     // Profile state
     const [profile, setProfile] = useState({ firstName: "", lastName: "", email: "", authProvider: "self", plan: "free", createdAt: "" });
@@ -242,6 +244,9 @@ const SettingsPage = () => {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [deleteLoading, setDeleteLoading] = useState(false);
     const [logoutLoading, setLogoutLoading] = useState(false);
+
+    // Avatar state
+    const [avatarLoading, setAvatarLoading] = useState(false);
 
     // Fetch profile on mount
     useEffect(() => {
@@ -279,6 +284,33 @@ const SettingsPage = () => {
             toast.error(err.response?.data?.message || "Failed to update profile");
         } finally {
             setProfileLoading(false);
+        }
+    };
+
+    // ── Avatar Upload ──
+    const handleAvatarUpload = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Local preview immediately
+        const localUrl = URL.createObjectURL(file);
+        setProfile((prev) => ({ ...prev, profilePicture: localUrl }));
+
+        const formData = new FormData();
+        formData.append("image", file);
+
+        try {
+            setAvatarLoading(true);
+            const res = await api.put("/users/profile-picture", formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+            });
+            setProfile((prev) => ({ ...prev, profilePicture: res.data.user.profilePicture }));
+            await fetchUser(); // Update global state
+            toast.success("Profile picture updated!");
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Failed to upload image");
+        } finally {
+            setAvatarLoading(false);
         }
     };
 
@@ -371,18 +403,37 @@ const SettingsPage = () => {
                             <div className="w-8 h-8 border-2 border-[#6C63FF] border-t-transparent rounded-full animate-spin" />
                         </div>
                     ) : (
-                        <div className="relative overflow-hidden rounded-2xl border border-white/[0.06] bg-gradient-to-br from-[#13151F] via-[#13151F] to-[#1A1D2A] p-6 mb-6 flex flex-col sm:flex-row items-center sm:items-start gap-5">
+                        <div className="relative overflow-hidden rounded-2xl border border-white/[0.06] bg-gradient-to-br from-[#13151F] via-[#13151F] to-[#1A1D2A] p-4 sm:p-6 mb-6 flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-5">
                             {/* Glow */}
                             <div className="pointer-events-none absolute -top-16 -right-16 w-48 h-48 rounded-full bg-[#6C63FF] opacity-[0.06] blur-3xl" />
                             <div className="pointer-events-none absolute -bottom-10 -left-10 w-32 h-32 rounded-full bg-[#4ECDC4] opacity-[0.05] blur-3xl" />
 
                             {/* Avatar */}
-                            <div className="relative shrink-0">
-                                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#6C63FF] to-[#4ECDC4] flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-[#6C63FF]/20">
+                            <div className="relative shrink-0 group">
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    id="profilePictureUpload"
+                                    className="hidden"
+                                    onChange={handleAvatarUpload}
+                                />
+                                <label htmlFor="profilePictureUpload" className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-[#6C63FF] to-[#4ECDC4] flex items-center justify-center text-white text-lg sm:text-xl font-bold shadow-lg shadow-[#6C63FF]/20 cursor-pointer overflow-hidden relative">
                                     {profile.profilePicture ? (
                                         <img src={profile.profilePicture} alt="avatar" className="w-full h-full object-cover rounded-2xl" />
                                     ) : initials}
-                                </div>
+                                    
+                                    {/* Hover overlay */}
+                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                        <Icon name="user" size={16} className="text-white" />
+                                    </div>
+
+                                    {/* Loading overlay */}
+                                    {avatarLoading && (
+                                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                        </div>
+                                    )}
+                                </label>
                                 {profile.plan === "pro" && (
                                     <div className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-gradient-to-br from-[#6C63FF] to-[#5B53EE] flex items-center justify-center text-[10px] shadow-lg">
                                         👑
@@ -495,7 +546,7 @@ const SettingsPage = () => {
 
                             {/* Account Overview */}
                             <SectionCard title="Account Overview" description="A summary of your current plan and usage.">
-                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
                                     {[
                                         { label: "Current Plan", value: profile.plan === "pro" ? "Pro 👑" : "Free", accent: profile.plan === "pro" },
                                         { label: "Auth Method", value: profile.authProvider === "google" ? "Google OAuth" : "Email & Password" },

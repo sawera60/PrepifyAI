@@ -52,8 +52,15 @@ const DashboardHeader = ({ onMenuToggle }) => {
                 </button>
 
                 {/* Avatar */}
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#6C63FF] to-[#4ECDC4] flex items-center justify-center text-white text-sm font-bold cursor-pointer ring-2 ring-white/[0.08] hover:ring-[#6C63FF]/40 transition-all duration-200">
-                    {user ? user.firstName?.[0]?.toUpperCase() || "U" : "U"}
+                <div 
+                    onClick={() => navigate("/settings")}
+                    className="w-8 h-8 rounded-full overflow-hidden bg-gradient-to-br from-[#6C63FF] to-[#4ECDC4] flex items-center justify-center text-white text-sm font-bold cursor-pointer ring-2 ring-white/[0.08] hover:ring-[#6C63FF]/40 transition-all duration-200"
+                >
+                    {user?.profilePicture ? (
+                        <img src={user.profilePicture} alt="avatar" className="w-full h-full object-cover" />
+                    ) : (
+                        user ? user.firstName?.[0]?.toUpperCase() || "U" : "U"
+                    )}
                 </div>
             </div>
         </header>

@@ -46,7 +46,7 @@ const MyInterview = () => {
                                             </svg>
                                         </div>
                                         <div className="min-w-0">
-                                            <h4 className="text-white font-medium text-sm truncate max-w-[170px]">{interview.title}</h4>
+                                            <h4 className="text-white font-medium text-sm truncate">{interview.title}</h4>
                                             <p className="text-xs text-[#8B89A0]">{interview.difficulty || "Medium"} • {interview.experience || "Mid"}</p>
                                         </div>
                                     </div>

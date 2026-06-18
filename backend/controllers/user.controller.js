@@ -1,5 +1,6 @@
 import { User } from "../models/user.model.js";
 import bcrypt from "bcryptjs";
+import cloudinary from "../config/cloudinary.js";
 
 // GET /api/users/profile
 export const getProfile = async (req, res) => {
@@ -108,5 +109,49 @@ export const deleteAccount = async (req, res) => {
         return res.status(200).json({ message: "Account deleted successfully" });
     } catch (error) {
         return res.status(500).json({ message: "Error deleting account" });
+    }
+};
+
+// PUT /api/users/profile-picture
+export const updateProfilePicture = async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ message: "No image file provided" });
+        }
+
+        const uploadStream = cloudinary.uploader.upload_stream(
+            { folder: "prepifyAI/avatars", transformation: [{ width: 400, height: 400, crop: "fill" }] },
+            async (error, result) => {
+                if (error) {
+                    console.error("Cloudinary Error:", error);
+                    return res.status(500).json({ message: "Error uploading image to Cloudinary" });
+                }
+
+                const updatedUser = await User.findByIdAndUpdate(
+                    req.user._id,
+                    { profilePicture: result.secure_url },
+                    { new: true, select: "-password" }
+                );
+
+                return res.status(200).json({
+                    message: "Profile picture updated successfully",
+                    user: {
+                        _id: updatedUser._id,
+                        firstName: updatedUser.firstName,
+                        lastName: updatedUser.lastName,
+                        email: updatedUser.email,
+                        profilePicture: updatedUser.profilePicture,
+                        authProvider: updatedUser.authProvider,
+                        plan: updatedUser.plan,
+                    },
+                });
+            }
+        );
+
+        uploadStream.end(req.file.buffer);
+
+    } catch (error) {
+        console.error("Profile picture upload error:", error);
+        return res.status(500).json({ message: "Error updating profile picture" });
     }
 };

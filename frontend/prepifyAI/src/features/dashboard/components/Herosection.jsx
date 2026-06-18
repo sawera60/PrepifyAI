@@ -76,7 +76,7 @@ const Herosection = () => {
                     {/* Chat bubble */}
                     <div className="absolute top-2 -left-16 md:top-6 md:-left-40 z-20 bg-[#1A1D2A] border border-white/[0.1] rounded-xl px-3 py-2 md:px-4 md:py-3 max-w-[160px] md:max-w-[200px] shadow-xl">
                         <p className="text-white text-xs leading-relaxed">
-                            Hello! I'm your AI Interview Agent. Let's crack your dream job! 🚀
+                            Hello! I'm your AI Interview Agent. Let's crack your dream job!!!
                         </p>
                         <div className="absolute top-1/2 -right-1.5 -translate-y-1/2 w-3 h-3 bg-[#1A1D2A] border-r border-t border-white/[0.1] rotate-45" />
                     </div>

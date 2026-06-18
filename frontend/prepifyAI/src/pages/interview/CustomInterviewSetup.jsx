@@ -305,10 +305,10 @@ const CustomInterviewSetup = () => {
       </header>
 
       {/* Two-panel setup area */}
-      <div className="flex flex-col items-center px-4 sm:px-6 pt-6 sm:pt-8 pb-4 flex-1">
-        <div className="grid grid-cols-2 gap-3 sm:gap-4 w-full max-w-2xl">
+      <div className="flex flex-col items-center px-3 sm:px-6 pt-4 sm:pt-8 pb-4 flex-1">
+        <div className="grid grid-cols-2 gap-2.5 sm:gap-4 w-full max-w-2xl">
           {/* AI Panel */}
-          <div className={`relative bg-[#13151F] border rounded-2xl p-4 sm:p-6 flex flex-col items-center gap-3 sm:gap-4 transition-all duration-300 ${isSpeaking ? "border-[#6C63FF]/60 shadow-[0_0_20px_rgba(108,99,255,0.15)]" : "border-white/[0.08]"}`}>
+          <div className={`relative bg-[#13151F] border rounded-xl sm:rounded-2xl p-3 sm:p-6 flex flex-col items-center gap-2 sm:gap-4 transition-all duration-300 ${isSpeaking ? "border-[#6C63FF]/60 shadow-[0_0_20px_rgba(108,99,255,0.15)]" : "border-white/[0.08]"}`}>
             {isSpeaking && (
               <div className="absolute top-2 sm:top-3 right-2 sm:right-3 flex items-center gap-1">
                 {[0, 150, 300].map((delay) => (
@@ -332,7 +332,7 @@ const CustomInterviewSetup = () => {
           </div>
 
           {/* User Panel */}
-          <div className={`relative bg-[#13151F] border rounded-2xl p-4 sm:p-6 flex flex-col items-center gap-3 sm:gap-4 transition-all duration-300 ${isListening ? "border-red-500/60 shadow-[0_0_20px_rgba(239,68,68,0.15)]" : "border-white/[0.08]"}`}>
+          <div className={`relative bg-[#13151F] border rounded-xl sm:rounded-2xl p-3 sm:p-6 flex flex-col items-center gap-2 sm:gap-4 transition-all duration-300 ${isListening ? "border-red-500/60 shadow-[0_0_20px_rgba(239,68,68,0.15)]" : "border-white/[0.08]"}`}>
             {isListening && (
               <div className="absolute top-2 sm:top-3 right-2 sm:right-3 flex items-center gap-1.5">
                 <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
@@ -358,11 +358,11 @@ const CustomInterviewSetup = () => {
         )}
 
         {/* Action buttons */}
-        <div className="flex flex-col items-center gap-3 mt-12 w-full max-w-md">
+        <div className="flex flex-col items-center gap-3 mt-6 sm:mt-12 w-full max-w-md">
           <button
             onClick={toggleRecording}
             disabled={micState === "processing" || micState === "creating" || (isSpeaking && !isListening)}
-            className={`relative w-24 h-24 rounded-full flex items-center justify-center transition-all select-none
+            className={`relative w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center transition-all select-none
               ${micState === "listening"
                 ? "bg-[#6C63FF] scale-110 shadow-[0_0_40px_rgba(108,99,255,0.6)]"
                 : micState === "processing" || micState === "creating" || (isSpeaking && !isListening)
@@ -391,7 +391,7 @@ const CustomInterviewSetup = () => {
                 </svg>
             )}
           </button>
-          <p className="text-sm text-[#8B89A0]">
+          <p className="text-xs sm:text-sm text-[#8B89A0]">
              {isListening ? "Recording — click to stop" : isProcessing ? "Processing..." : isCreating ? "Creating..." : isSpeaking ? "AI is speaking..." : "Click mic to speak"}
           </p>
         </div>

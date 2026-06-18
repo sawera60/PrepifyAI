@@ -1,19 +1,29 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
+import { FiCpu, FiEdit3, FiFileText, FiChevronRight, FiInbox } from "react-icons/fi";
+import DashboardHeader from "../../features/dashboard/components/DashboardHeader";
+import Sidebar from "../../features/dashboard/components/Sidebar";
 
 const getScoreColor = (score) => {
-    if (score >= 80) return "text-emerald-400";
+    if (score >= 80) return "text-[#4ECDC4]";
     if (score >= 60) return "text-[#6C63FF]";
     if (score >= 40) return "text-amber-400";
     return "text-rose-400";
 };
 
 const getScoreBg = (score) => {
-    if (score >= 80) return "bg-emerald-500/10 border-emerald-500/20";
-    if (score >= 60) return "bg-[#6C63FF]/10 border-[#6C63FF]/20";
-    if (score >= 40) return "bg-amber-500/10 border-amber-500/20";
-    return "bg-rose-500/10 border-rose-500/20";
+    if (score >= 80) return "bg-[#4ECDC4]/10 border-[#4ECDC4]/20 shadow-[0_0_10px_rgba(78,205,196,0.1)]";
+    if (score >= 60) return "bg-[#6C63FF]/10 border-[#6C63FF]/20 shadow-[0_0_10px_rgba(108,99,255,0.1)]";
+    if (score >= 40) return "bg-amber-400/10 border-amber-400/20 shadow-[0_0_10px_rgba(251,191,36,0.1)]";
+    return "bg-rose-400/10 border-rose-400/20 shadow-[0_0_10px_rgba(244,63,94,0.1)]";
+};
+
+const getProgressBarColor = (score) => {
+    if (score >= 80) return "bg-[#4ECDC4] shadow-[0_0_8px_rgba(78,205,196,0.5)]";
+    if (score >= 60) return "bg-[#6C63FF] shadow-[0_0_8px_rgba(108,99,255,0.5)]";
+    if (score >= 40) return "bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.5)]";
+    return "bg-rose-400 shadow-[0_0_8px_rgba(244,63,94,0.5)]";
 };
 
 const getScoreLabel = (score) => {
@@ -23,32 +33,10 @@ const getScoreLabel = (score) => {
     return "Needs Work";
 };
 
-const getSourceIcon = (generatedFrom) => {
-    if (generatedFrom === "resume") {
-        return (
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                <polyline points="14 2 14 8 20 8" />
-                <line x1="16" y1="13" x2="8" y2="13" />
-                <line x1="16" y1="17" x2="8" y2="17" />
-            </svg>
-        );
-    }
-    if (generatedFrom === "custom") {
-        return (
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="3"></circle>
-                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-            </svg>
-        );
-    }
-    return (
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <circle cx="12" cy="12" r="10" />
-            <circle cx="12" cy="12" r="6" />
-            <circle cx="12" cy="12" r="2" />
-        </svg>
-    );
+const getSourceIcon = (generatedFrom, className = "w-5 h-5") => {
+    if (generatedFrom === "resume") return <FiFileText className={className} />;
+    if (generatedFrom === "custom") return <FiEdit3 className={className} />;
+    return <FiCpu className={className} />;
 };
 
 const MyInterviewsPage = () => {
@@ -57,6 +45,7 @@ const MyInterviewsPage = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [filter, setFilter] = useState("all"); // all | mock | custom | resume
+    const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     useEffect(() => {
         const fetchSessions = async () => {
@@ -64,7 +53,8 @@ const MyInterviewsPage = () => {
                 const res = await api.get("/sessions/my-sessions");
                 setAnalyses(res.data.analyses);
             } catch (err) {
-                setError("Failed to load your interviews.");
+                console.error("DEBUG MyInterviewsPage API error:", err, err.response?.data);
+                setError(err.response?.data?.message || err.message || "Failed to load your interviews.");
             } finally {
                 setLoading(false);
             }
@@ -86,206 +76,198 @@ const MyInterviewsPage = () => {
         ? Math.max(...analyses.map((a) => a.score))
         : 0;
 
-    if (loading) {
-        return (
-            <div className="min-h-screen bg-[#0B0D14] font-dm text-white flex items-center justify-center">
-                <div className="flex flex-col items-center gap-4">
-                    <div className="w-10 h-10 border-2 border-[#6C63FF] border-t-transparent rounded-full animate-spin" />
-                    <p className="text-[#8B89A0] text-sm">Loading your interviews...</p>
-                </div>
-            </div>
-        );
-    }
-
     return (
-        <div className="min-h-screen bg-[#0B0D14] font-dm text-white p-6 md:p-10">
-            <div className="max-w-5xl mx-auto">
+        <div className="min-h-screen bg-[#0B0D14] flex flex-col md:flex-row overflow-hidden font-dm relative">
+            
+            {/* Ambient Background Glows */}
+            <div className="pointer-events-none fixed top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-[#6C63FF] opacity-[0.05] blur-[150px]" />
+            <div className="pointer-events-none fixed bottom-[-10%] right-[-5%] w-[400px] h-[400px] rounded-full bg-[#4ECDC4] opacity-[0.05] blur-[150px]" />
 
-                {/* Header */}
-                <div className="mb-8">
-                    <h1 className="font-syne text-2xl md:text-3xl font-bold text-white mb-1">
-                        My Interviews
-                    </h1>
-                    <p className="text-[#8B89A0] text-sm">
-                        Your complete interview history and performance reports
-                    </p>
-                </div>
+            <Sidebar
+                mobileOpen={mobileMenuOpen}
+                onClose={() => setMobileMenuOpen(false)}
+            />
 
-                {/* Stats Row */}
-                {totalInterviews > 0 && (
-                    <div className="grid grid-cols-3 gap-4 mb-8">
-                        <div className="bg-[#13151F] border border-white/[0.06] rounded-2xl p-4 text-center">
-                            <p className="text-2xl font-bold font-syne text-white">{totalInterviews}</p>
-                            <p className="text-xs text-[#8B89A0] mt-1">Total Interviews</p>
-                        </div>
-                        <div className="bg-[#13151F] border border-white/[0.06] rounded-2xl p-4 text-center">
-                            <p className={`text-2xl font-bold font-syne ${getScoreColor(avgScore)}`}>{avgScore}%</p>
-                            <p className="text-xs text-[#8B89A0] mt-1">Average Score</p>
-                        </div>
-                        <div className="bg-[#13151F] border border-white/[0.06] rounded-2xl p-4 text-center">
-                            <p className={`text-2xl font-bold font-syne ${getScoreColor(bestScore)}`}>{bestScore}%</p>
-                            <p className="text-xs text-[#8B89A0] mt-1">Best Score</p>
-                        </div>
-                    </div>
-                )}
+            <div className="flex-1 flex flex-col min-h-screen relative z-10 overflow-y-auto lg:ml-[264px]">
+                <DashboardHeader onMenuToggle={() => setMobileMenuOpen(true)} />
 
-                {/* Filter tabs */}
-                {totalInterviews > 0 && (
-                    <div className="flex gap-2 mb-6">
-                        {["all", "mock", "custom", "resume"].map((f) => (
-                            <button
-                                key={f}
-                                onClick={() => setFilter(f)}
-                                className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all capitalize ${filter === f
-                                    ? "bg-[#6C63FF] text-white"
-                                    : "bg-[#13151F] border border-white/[0.06] text-[#8B89A0] hover:text-white"
-                                    }`}
-                            >
-                                {f === "all" ? "All" : f === "mock" ? (
-                                    <span className="flex items-center gap-1.5">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" /></svg> Mock
-                                    </span>
-                                ) : f === "custom" ? (
-                                    <span className="flex items-center gap-1.5">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg> Custom
-                                    </span>
-                                ) : (
-                                    <span className="flex items-center gap-1.5">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /></svg> Resume
-                                    </span>
-                                )}
-                            </button>
-                        ))}
-                    </div>
-                )}
-
-                {/* Error */}
-                {error && (
-                    <div className="mb-6 px-4 py-3 bg-red-500/10 border border-red-500/20 text-red-400 rounded-xl text-sm">
-                        {error}
-                    </div>
-                )}
-
-                {/* Empty state */}
-                {totalInterviews === 0 && (
-                    <div className="bg-[#13151F] border border-white/[0.06] rounded-2xl p-12 text-center">
-                        <div className="w-14 h-14 rounded-2xl bg-[#1A1D2A] border border-white/[0.06] flex items-center justify-center mx-auto mb-4 text-2xl">
-                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#6C63FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"></path>
-                                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-                                <line x1="12" y1="19" x2="12" y2="22"></line>
-                            </svg>
-                        </div>
-                        <h3 className="font-syne font-bold text-white text-lg mb-2">No interviews yet</h3>
-                        <p className="text-[#8B89A0] text-sm mb-6 max-w-xs mx-auto">
-                            Complete your first interview to see your performance history here.
+                <main className="flex-1 p-4 sm:p-6 md:p-8 lg:p-10 max-w-6xl mx-auto w-full">
+                    <div className="mb-8">
+                        <h1 className="font-syne text-2xl md:text-3xl font-bold text-white mb-1.5 tracking-tight">
+                            My Interviews
+                        </h1>
+                        <p className="text-[#8B89A0] text-sm">
+                            Review your performance history and detailed analysis reports.
                         </p>
-                        <button
-                            onClick={() => navigate("/dashboard")}
-                            className="px-6 py-2.5 bg-[#6C63FF] hover:bg-[#5B54E8] text-white font-semibold rounded-xl text-sm transition-all"
-                        >
-                            Start an Interview
-                        </button>
                     </div>
-                )}
 
-                {/* No results for filter */}
-                {totalInterviews > 0 && filtered.length === 0 && (
-                    <div className="bg-[#13151F] border border-white/[0.06] rounded-2xl p-8 text-center">
-                        <p className="text-[#8B89A0] text-sm">No {filter} interviews found.</p>
-                    </div>
-                )}
-
-                {/* Interview cards */}
-                <div className="space-y-3">
-                    {filtered.map((analysis, idx) => {
-                        const interview = analysis.interviewId;
-                        const date = new Date(analysis.createdAt).toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                        });
-
-                        return (
-                            <div
-                                key={analysis._id}
-                                onClick={() => navigate(`/interview/${analysis.sessionId}/analysis`)}
-                                className="group bg-[#13151F] border border-white/[0.06] hover:border-[#6C63FF]/30 rounded-2xl p-5 cursor-pointer transition-all duration-200 hover:bg-[#13151F]/80"
-                            >
-                                <div className="flex items-center justify-between gap-4">
-
-                                    {/* Left — icon + info */}
-                                    <div className="flex items-center gap-4 min-w-0">
-                                        <div className="w-10 h-10 rounded-xl bg-[#1A1D2A] border border-white/[0.06] flex items-center justify-center text-lg shrink-0">
-                                            {getSourceIcon(interview?.generatedFrom)}
-                                        </div>
-                                        <div className="min-w-0">
-                                            <h3 className="font-syne font-bold text-white text-sm truncate">
-                                                {interview?.title || "Interview"}
-                                            </h3>
-                                            <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                                                <span className="text-xs text-[#8B89A0]">{date}</span>
-                                                {interview?.difficulty && (
-                                                    <>
-                                                        <span className="text-[#8B89A0]">·</span>
-                                                        <span className="text-xs text-[#8B89A0]">{interview.difficulty}</span>
-                                                    </>
-                                                )}
-                                                {interview?.category && (
-                                                    <>
-                                                        <span className="text-[#8B89A0]">·</span>
-                                                        <span className="text-xs text-[#8B89A0] truncate max-w-[120px]">{interview.category}</span>
-                                                    </>
-                                                )}
-                                            </div>
-                                        </div>
+                    {loading ? (
+                        <div className="flex flex-col items-center justify-center py-20 gap-4">
+                            <div className="w-12 h-12 border-4 border-white/10 border-t-[#6C63FF] rounded-full animate-spin shadow-[0_0_15px_rgba(108,99,255,0.3)]" />
+                            <p className="text-[#8B89A0] text-sm font-medium">Fetching your records...</p>
+                        </div>
+                    ) : (
+                        <>
+                            {/* Stats Row */}
+                            {totalInterviews > 0 && (
+                                <div className="grid grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
+                                    <div className="bg-[#13151F]/80 backdrop-blur-xl border border-white/10 rounded-xl sm:rounded-2xl p-3 sm:p-5 text-center shadow-[0_0_30px_rgba(0,0,0,0.2)] relative overflow-hidden group">
+                                        <div className="absolute top-0 right-0 w-24 h-24 bg-white/5 rounded-bl-full pointer-events-none group-hover:bg-white/10 transition-colors" />
+                                        <p className="text-xl sm:text-2xl md:text-3xl font-black font-syne text-white tracking-tight mb-0.5">{totalInterviews}</p>
+                                        <p className="text-[10px] sm:text-xs text-[#8B89A0] font-semibold uppercase tracking-wider">Total</p>
                                     </div>
-
-                                    {/* Right — score + arrow */}
-                                    <div className="flex items-center gap-3 shrink-0">
-                                        <div className={`px-3 py-1.5 rounded-xl border text-xs font-bold ${getScoreBg(analysis.score)}`}>
-                                            <span className={getScoreColor(analysis.score)}>
-                                                {analysis.score}% · {getScoreLabel(analysis.score)}
-                                            </span>
-                                        </div>
-                                        <svg
-                                            width="16" height="16"
-                                            viewBox="0 0 24 24"
-                                            fill="none"
-                                            stroke="#5A5870"
-                                            strokeWidth="2"
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            className="group-hover:stroke-[#6C63FF] transition-colors"
-                                        >
-                                            <polyline points="9 18 15 12 9 6" />
-                                        </svg>
+                                    <div className="bg-[#13151F]/80 backdrop-blur-xl border border-white/10 rounded-xl sm:rounded-2xl p-3 sm:p-5 text-center shadow-[0_0_30px_rgba(0,0,0,0.2)] relative overflow-hidden group">
+                                        <div className="absolute top-0 right-0 w-24 h-24 bg-[#6C63FF]/5 rounded-bl-full pointer-events-none group-hover:bg-[#6C63FF]/10 transition-colors" />
+                                        <p className={`text-xl sm:text-2xl md:text-3xl font-black font-syne tracking-tight mb-0.5 ${getScoreColor(avgScore)}`}>{avgScore}%</p>
+                                        <p className="text-[10px] sm:text-xs text-[#8B89A0] font-semibold uppercase tracking-wider">Average</p>
+                                    </div>
+                                    <div className="bg-[#13151F]/80 backdrop-blur-xl border border-white/10 rounded-xl sm:rounded-2xl p-3 sm:p-5 text-center shadow-[0_0_30px_rgba(0,0,0,0.2)] relative overflow-hidden group">
+                                        <div className="absolute top-0 right-0 w-24 h-24 bg-[#4ECDC4]/5 rounded-bl-full pointer-events-none group-hover:bg-[#4ECDC4]/10 transition-colors" />
+                                        <p className={`text-xl sm:text-2xl md:text-3xl font-black font-syne tracking-tight mb-0.5 ${getScoreColor(bestScore)}`}>{bestScore}%</p>
+                                        <p className="text-[10px] sm:text-xs text-[#8B89A0] font-semibold uppercase tracking-wider">Best</p>
                                     </div>
                                 </div>
+                            )}
 
-                                {/* Dimension mini bars */}
-                                {analysis.dimensions && (
-                                    <div className="mt-4 grid grid-cols-5 gap-2">
-                                        {Object.entries(analysis.dimensions).map(([key, val]) => (
-                                            <div key={key} className="flex flex-col gap-1">
-                                                <div className="w-full h-1 bg-[#22283D] rounded-full overflow-hidden">
-                                                    <div
-                                                        className={`h-full rounded-full ${val >= 80 ? "bg-emerald-500" : val >= 60 ? "bg-[#6C63FF]" : val >= 40 ? "bg-amber-500" : "bg-rose-500"}`}
-                                                        style={{ width: `${val}%` }}
-                                                    />
-                                                </div>
-                                                <p className="text-[10px] text-[#8B89A0] truncate">
-                                                    {key.replace(/([A-Z])/g, " $1").trim()}
-                                                </p>
-                                            </div>
-                                        ))}
+                            {/* Filter tabs */}
+                            {totalInterviews > 0 && (
+                                <div className="flex gap-2 md:gap-3 mb-6 sm:mb-8 overflow-x-auto pb-1 scrollbar-hide">
+                                    <div className="flex gap-2 bg-[#13151F]/60 p-1.5 sm:p-2 rounded-xl sm:rounded-2xl border border-white/5 backdrop-blur-md">
+                                    {["all", "mock", "custom", "resume"].map((f) => (
+                                        <button
+                                            key={f}
+                                            onClick={() => setFilter(f)}
+                                            className={`px-3 sm:px-5 py-1.5 sm:py-2 md:py-2.5 rounded-lg sm:rounded-xl text-xs md:text-sm font-semibold transition-all flex items-center gap-1.5 sm:gap-2 capitalize whitespace-nowrap ${
+                                                filter === f
+                                                    ? "bg-gradient-to-r from-[#6C63FF] to-[#5B53EE] text-white shadow-lg shadow-[#6C63FF]/25"
+                                                    : "bg-transparent text-[#8B89A0] hover:text-white hover:bg-white/5"
+                                            }`}
+                                        >
+                                            {f !== "all" && getSourceIcon(f, "w-4 h-4")}
+                                            {f}
+                                        </button>
+                                    ))}
                                     </div>
-                                )}
-                            </div>
-                        );
-                    })}
-                </div>
+                                </div>
+                            )}
 
+                            {/* Error */}
+                            {error && (
+                                <div className="mb-8 px-5 py-4 bg-red-500/10 border border-red-500/20 text-red-400 rounded-2xl text-sm flex items-center gap-3">
+                                    <FiInbox className="w-5 h-5 shrink-0" />
+                                    {error}
+                                </div>
+                            )}
+
+                            {/* Empty state */}
+                            {totalInterviews === 0 && !error && (
+                                <div className="bg-[#13151F]/80 backdrop-blur-xl border border-white/10 rounded-2xl p-12 lg:p-14 text-center shadow-[0_0_40px_rgba(0,0,0,0.2)]">
+                                    <div className="w-16 h-16 rounded-2xl bg-[#6C63FF]/10 border border-[#6C63FF]/20 flex items-center justify-center mx-auto mb-5">
+                                        <FiInbox className="w-8 h-8 text-[#6C63FF]" />
+                                    </div>
+                                    <h3 className="font-syne font-bold text-white text-xl mb-2 tracking-tight">No interviews yet</h3>
+                                    <p className="text-[#8B89A0] text-sm mb-6 max-w-sm mx-auto leading-relaxed">
+                                        You haven't completed any interviews. Take your first mock interview to get a detailed performance report here.
+                                    </p>
+                                    <button
+                                        onClick={() => navigate("/dashboard")}
+                                        className="px-6 py-2.5 bg-gradient-to-r from-[#6C63FF] to-[#5B53EE] hover:from-[#5B53EE] hover:to-[#4B44DD] text-white font-semibold rounded-xl text-sm transition-all shadow-lg shadow-[#6C63FF]/25"
+                                    >
+                                        Start an Interview
+                                    </button>
+                                </div>
+                            )}
+
+                            {/* No results for filter */}
+                            {totalInterviews > 0 && filtered.length === 0 && (
+                                <div className="bg-[#13151F]/80 backdrop-blur-xl border border-white/10 rounded-3xl p-12 text-center shadow-[0_0_40px_rgba(0,0,0,0.2)]">
+                                    <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center mx-auto mb-4">
+                                        <FiInbox className="w-8 h-8 text-[#8B89A0]" />
+                                    </div>
+                                    <p className="text-[#8B89A0] text-base font-medium">No <span className="capitalize text-white">{filter}</span> interviews found.</p>
+                                </div>
+                            )}
+
+                            {/* Interview cards list */}
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4 md:gap-6">
+                                {filtered.map((analysis) => {
+                                    const interview = analysis.interviewId;
+                                    const date = new Date(analysis.createdAt).toLocaleDateString("en-US", {
+                                        month: "short",
+                                        day: "numeric",
+                                        year: "numeric",
+                                    });
+
+                                    return (
+                                        <div
+                                            key={analysis._id}
+                                            onClick={() => navigate(`/interview/${analysis.sessionId}/analysis`)}
+                                            className="group bg-[#13151F]/60 backdrop-blur-md border border-white/10 hover:border-[#6C63FF]/40 rounded-2xl sm:rounded-3xl p-4 sm:p-6 cursor-pointer transition-all duration-300 hover:bg-[#13151F] hover:shadow-[0_0_30px_rgba(108,99,255,0.15)] flex flex-col justify-between relative"
+                                        >
+                                            <div className="flex items-start justify-between gap-3 sm:gap-4 mb-3 sm:mb-5">
+                                                {/* Left — icon + info */}
+                                                <div className="flex items-start gap-3 min-w-0">
+                                                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-[#1A1D2A] border border-white/10 flex items-center justify-center text-[#9F9BFF] shrink-0 group-hover:scale-110 group-hover:bg-[#6C63FF]/20 group-hover:border-[#6C63FF]/30 transition-all duration-300">
+                                                        {getSourceIcon(interview?.generatedFrom, "w-5 h-5")}
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <h3 className="font-syne font-bold text-white text-sm md:text-base truncate group-hover:text-[#6C63FF] transition-colors">
+                                                            {interview?.title || "Mock Interview"}
+                                                        </h3>
+                                                        <div className="flex items-center gap-2 mt-1 flex-wrap">
+                                                            <span className="text-[11px] text-[#8B89A0] font-medium bg-white/5 px-1.5 py-0.5 rounded">{date}</span>
+                                                            {interview?.difficulty && (
+                                                                <span className="text-[11px] text-[#8B89A0] font-medium bg-white/5 px-1.5 py-0.5 rounded capitalize">{interview.difficulty}</span>
+                                                            )}
+                                                            {interview?.category && (
+                                                                <span className="text-[11px] text-[#8B89A0] font-medium bg-white/5 px-1.5 py-0.5 rounded truncate max-w-[120px]">{interview.category}</span>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                {/* Right — score indicator */}
+                                                <div className="flex flex-col items-end shrink-0">
+                                                    <div className={`px-3 py-1.5 rounded-xl border flex flex-col items-center justify-center ${getScoreBg(analysis.score)} transition-transform group-hover:scale-105`}>
+                                                        <span className={`text-lg font-black font-syne leading-none ${getScoreColor(analysis.score)}`}>
+                                                            {analysis.score}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {/* Dimension mini bars */}
+                                            {analysis.dimensions && (
+                                                <div className="mt-auto border-t border-white/5 pt-3 sm:pt-4 grid grid-cols-3 sm:grid-cols-5 gap-2 sm:gap-2.5">
+                                                    {Object.entries(analysis.dimensions).map(([key, val]) => (
+                                                        <div key={key} className="flex flex-col gap-1.5 group/bar">
+                                                            <div className="flex justify-between items-end">
+                                                                <span className="text-[9px] md:text-[10px] font-semibold text-[#8B89A0] truncate uppercase tracking-wider group-hover/bar:text-white transition-colors">
+                                                                    {key.replace(/([A-Z])/g, " $1").trim().split(" ")[0]}
+                                                                </span>
+                                                            </div>
+                                                            <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden border border-white/5">
+                                                                <div
+                                                                    className={`h-full rounded-full transition-all duration-1000 ${getProgressBarColor(val)}`}
+                                                                    style={{ width: `${val}%` }}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                            
+                                            {/* Explore Prompt */}
+                                            <div className="absolute top-1/2 right-4 -translate-y-1/2 opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 hidden md:flex items-center justify-center w-8 h-8 rounded-full bg-[#6C63FF] shadow-lg shadow-[#6C63FF]/30">
+                                                <FiChevronRight className="w-5 h-5 text-white" />
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </>
+                    )}
+                </main>
             </div>
         </div>
     );

@@ -1,9 +1,10 @@
 import React, { useState, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import api from "../../services/api";
 import contextApi from "../../context/contextApi.jsx";
 import { toast } from "react-toastify";
-import logo from "../../assets/logo.png"
+import logo from "../../assets/logo.png";
+import AnimatedBackground from "./components/AnimatedBackground";
 
 const SignUp = () => {
     const [formData, setFormData] = useState({
@@ -43,13 +44,14 @@ const SignUp = () => {
     return (
         <>
 
-            <div className="font-dm min-h-screen bg-[#0B0D14] flex items-center justify-center px-4 py-12 relative overflow-hidden">
-                <div className="pointer-events-none absolute -top-32 -left-32 w-[480px] h-[480px] rounded-full bg-[#6C63FF] opacity-[0.07] blur-3xl" />
-                <div className="pointer-events-none absolute -bottom-32 -right-24 w-[360px] h-[360px] rounded-full bg-[#4ECDC4] opacity-[0.06] blur-3xl" />
-                <div className="relative w-full max-w-md bg-[#13151F] border border-white/[0.08] rounded-2xl p-8 shadow-2xl">
+            <div className="font-dm min-h-screen bg-[#0B0D14] flex items-center justify-center px-4 py-6 relative overflow-hidden">
+                
+                <AnimatedBackground />
+
+                <div className="relative z-20 w-full max-w-md bg-[#13151F]/80 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
 
                     {/* Logo */}
-                    <div className="flex items-center gap-2.5 mb-8">
+                    <div className="flex items-center gap-2.5 mb-5">
                         <div className="w-8 h-8 bg-[#6C63FF] rounded-lg flex items-center justify-center flex-shrink-0">
                             <img src={logo} alt="logo" />
                         </div>
@@ -59,7 +61,7 @@ const SignUp = () => {
                     </div>
 
                     {/* Heading */}
-                    <div className="mb-7">
+                    <div className="mb-5">
                         <div className="inline-flex items-center gap-1.5 bg-[#6C63FF]/10 text-[#9F9BFF] text-[10px] font-medium tracking-widest uppercase px-3 py-1 rounded-full mb-3">
                             <span className="w-1.5 h-1.5 rounded-full bg-[#6C63FF] inline-block" />
                             Get Started Free
@@ -73,7 +75,7 @@ const SignUp = () => {
                     </div>
 
                     {/* Form */}
-                    <form onSubmit={handleSubmit} className="space-y-4">
+                    <form onSubmit={handleSubmit} className="space-y-3">
 
                         {/* First + Last name row */}
                         <div className="grid grid-cols-2 gap-3">
@@ -217,7 +219,7 @@ const SignUp = () => {
                                 <path d="M3 8h10M9 4l4 4-4 4" />
                             </svg>
                         </button>
-                        <div className="flex items-center gap-3 my-4">
+                        <div className="flex items-center gap-3 my-3">
                             <div className="flex-1 h-px bg-white/10"></div>
                             <span className="text-xs text-[#8B89A0]">OR</span>
                             <div className="flex-1 h-px bg-white/10"></div>
@@ -245,12 +247,12 @@ const SignUp = () => {
                         {/* Sign in link */}
                         <p className="text-center text-[#8B89A0] text-xs pt-1">
                             Already have an account?{" "}
-                            <a
-                                href="/login"
+                            <Link
+                                to="/login"
                                 className="text-[#6C63FF] hover:text-[#9F9BFF] font-medium transition-colors duration-150"
                             >
                                 Sign in
-                            </a>
+                            </Link>
                         </p>
                     </form>
                 </div>

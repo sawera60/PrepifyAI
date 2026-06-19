@@ -21,8 +21,7 @@ const Herosection = () => {
 
                     {/* Heading */}
                     <h2 className="font-syne text-2xl md:text-3xl font-bold text-white tracking-tight leading-tight mb-2">
-                        Get Interview<br />
-                        Ready with <span className="text-[#6C63FF]">AI</span>
+                        Get Interview <br className="hidden sm:inline" />Ready with <span className="text-[#6C63FF]">AI</span>
                     </h2>
 
                     {/* Subtitle */}

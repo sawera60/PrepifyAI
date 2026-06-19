@@ -18,10 +18,10 @@ const MockInterviewList = () => {
                 </h2>
             </div>
 
-            {/* Cards Grid / Flex on mobile */}
-            <div className="flex sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-4 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory">
+            {/* Cards Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {mockInterviews?.map((interview) => (
-                    <div key={interview._id} className="min-w-[85vw] sm:min-w-0 snap-center shrink-0">
+                    <div key={interview._id} className="w-full">
                         <InterviewCard
                             interview={interview}
                         />

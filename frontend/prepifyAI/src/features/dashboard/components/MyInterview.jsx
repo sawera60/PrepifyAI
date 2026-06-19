@@ -26,9 +26,9 @@ const MyInterview = () => {
                 </button>
             </div>
 
-            <div className="flex md:grid md:grid-cols-2 gap-4 overflow-x-auto pb-2 scrollbar-hide snap-x snap-mandatory">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {myInterviews && myInterviews.length > 0 ? (
-                    <div className="min-w-[85vw] md:min-w-0 snap-center shrink-0 bg-[#13151F] border border-white/[0.06] rounded-2xl p-5 flex flex-col min-h-[160px]">
+                    <div className="w-full bg-[#13151F] border border-white/[0.06] rounded-2xl p-5 flex flex-col min-h-[160px]">
                         <h3 className="text-[#8B89A0] font-semibold text-xs uppercase tracking-wider mb-3">Custom Generated</h3>
                         <div className="space-y-3.5 max-h-[160px] overflow-y-auto pr-1">
                             {myInterviews.map((interview) => (
@@ -65,7 +65,7 @@ const MyInterview = () => {
                     </div>
                 ) : (
                     /* Empty State Card */
-                    <div className="min-w-[85vw] md:min-w-0 snap-center shrink-0 bg-[#13151F] border border-white/[0.06] rounded-2xl p-5 flex items-center gap-6">
+                    <div className="w-full bg-[#13151F] border border-white/[0.06] rounded-2xl p-5 flex items-center gap-6">
                         {/* Icon */}
                         <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-[#1A1D2A] border border-white/[0.06] flex items-center justify-center">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#5A5870" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
@@ -90,7 +90,7 @@ const MyInterview = () => {
                 )}
 
                 {/* Resume Overview Card */}
-                <div className="min-w-[85vw] md:min-w-0 snap-center shrink-0 bg-[#13151F] border border-white/[0.06] rounded-2xl p-5">
+                <div className="w-full bg-[#13151F] border border-white/[0.06] rounded-2xl p-5">
                     <div className="flex items-center justify-between mb-4">
                         <h3 className="font-syne text-base font-bold text-white flex items-center gap-2">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6C63FF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

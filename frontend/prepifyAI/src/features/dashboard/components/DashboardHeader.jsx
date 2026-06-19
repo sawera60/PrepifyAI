@@ -26,7 +26,7 @@ const DashboardHeader = ({ onMenuToggle }) => {
                         <line x1="3" y1="18" x2="21" y2="18" />
                     </svg>
                 </button>
-                <h1 className="font-syne text-lg sm:text-xl font-bold text-white tracking-tight">
+                <h1 className="font-syne text-base sm:text-xl font-bold text-white tracking-tight truncate max-w-[180px] sm:max-w-none">
                     Welcome back{user?.firstName ? `, ${user.firstName}` : ''}! 👋
                 </h1>
             </div>

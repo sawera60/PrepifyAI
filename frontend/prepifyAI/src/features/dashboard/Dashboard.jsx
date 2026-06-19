@@ -24,7 +24,7 @@ const Dashboard = () => {
             />
 
             {/* Main Content — offset only on lg+ */}
-            <div className="flex-1 min-h-screen lg:ml-[264px]">
+            <div className="flex-1 min-w-0 min-h-screen lg:ml-[264px]">
                 <DashboardHeader onMenuToggle={() => setMobileMenuOpen(true)} />
 
                 <main className="max-w-[1550px] mx-auto px-4 sm:px-6">

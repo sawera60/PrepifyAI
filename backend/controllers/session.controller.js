@@ -295,14 +295,7 @@ export const voiceMessageToSession = async (req, res) => {
     }
 };
 
-export const testVoiceMessage = async (req, res) => {
-    try {
-        const audio = await textToSpeech("Hello! This is a voice test from PrepifyAI.");
-        res.json({ audio, audioLength: audio?.length ?? 0 });
-    } catch (err) {
-        res.status(500).json({ message: err.message });
-    }
-};
+
 
 // GET /api/sessions/:id/analysis
 export const getSessionAnalysis = async (req, res) => {

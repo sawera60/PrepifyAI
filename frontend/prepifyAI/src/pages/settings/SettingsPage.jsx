@@ -257,7 +257,7 @@ const SettingsPage = () => {
                 const u = res.data.user;
                 setProfile(u);
                 setProfileForm({ firstName: u.firstName, lastName: u.lastName });
-            } catch (err) {
+            } catch {
                 toast.error("Failed to load profile. Please login again.");
                 navigate("/login");
             } finally {
@@ -280,7 +280,7 @@ const SettingsPage = () => {
             setProfile((prev) => ({ ...prev, ...u }));
             setProfileForm({ firstName: u.firstName, lastName: u.lastName });
             toast.success("Profile updated successfully!");
-        } catch (err) {
+        } catch {
             toast.error(err.response?.data?.message || "Failed to update profile");
         } finally {
             setProfileLoading(false);
@@ -307,7 +307,7 @@ const SettingsPage = () => {
             setProfile((prev) => ({ ...prev, profilePicture: res.data.user.profilePicture }));
             await fetchUser(); // Update global state
             toast.success("Profile picture updated!");
-        } catch (err) {
+        } catch {
             toast.error(err.response?.data?.message || "Failed to upload image");
         } finally {
             setAvatarLoading(false);
@@ -328,7 +328,7 @@ const SettingsPage = () => {
             await api.put("/users/change-password", pwForm);
             toast.success("Password changed successfully!");
             setPwForm({ currentPassword: "", newPassword: "", confirmNewPassword: "" });
-        } catch (err) {
+        } catch {
             toast.error(err.response?.data?.message || "Failed to change password");
         } finally {
             setPwLoading(false);
@@ -356,7 +356,7 @@ const SettingsPage = () => {
             await api.delete("/users/account");
             toast.success("Account deleted successfully");
             navigate("/");
-        } catch (err) {
+        } catch {
             toast.error(err.response?.data?.message || "Failed to delete account");
         } finally {
             setDeleteLoading(false);

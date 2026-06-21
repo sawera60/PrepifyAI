@@ -26,13 +26,6 @@ const getProgressBarColor = (score) => {
     return "bg-rose-400 shadow-[0_0_8px_rgba(244,63,94,0.5)]";
 };
 
-const getScoreLabel = (score) => {
-    if (score >= 80) return "Excellent";
-    if (score >= 60) return "Good";
-    if (score >= 40) return "Average";
-    return "Needs Work";
-};
-
 const getSourceIcon = (generatedFrom, className = "w-5 h-5") => {
     if (generatedFrom === "resume") return <FiFileText className={className} />;
     if (generatedFrom === "custom") return <FiEdit3 className={className} />;
@@ -78,7 +71,7 @@ const MyInterviewsPage = () => {
 
     return (
         <div className="min-h-screen bg-[#0B0D14] flex flex-col md:flex-row overflow-hidden font-dm relative">
-            
+
             {/* Ambient Background Glows */}
             <div className="pointer-events-none fixed top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-[#6C63FF] opacity-[0.05] blur-[150px]" />
             <div className="pointer-events-none fixed bottom-[-10%] right-[-5%] w-[400px] h-[400px] rounded-full bg-[#4ECDC4] opacity-[0.05] blur-[150px]" />
@@ -133,20 +126,19 @@ const MyInterviewsPage = () => {
                             {totalInterviews > 0 && (
                                 <div className="flex gap-2 md:gap-3 mb-6 sm:mb-8 overflow-x-auto pb-1 scrollbar-hide">
                                     <div className="flex gap-2 bg-[#13151F]/60 p-1.5 sm:p-2 rounded-xl sm:rounded-2xl border border-white/5 backdrop-blur-md">
-                                    {["all", "mock", "custom", "resume"].map((f) => (
-                                        <button
-                                            key={f}
-                                            onClick={() => setFilter(f)}
-                                            className={`px-3 sm:px-5 py-1.5 sm:py-2 md:py-2.5 rounded-lg sm:rounded-xl text-xs md:text-sm font-semibold transition-all flex items-center gap-1.5 sm:gap-2 capitalize whitespace-nowrap ${
-                                                filter === f
-                                                    ? "bg-gradient-to-r from-[#6C63FF] to-[#5B53EE] text-white shadow-lg shadow-[#6C63FF]/25"
-                                                    : "bg-transparent text-[#8B89A0] hover:text-white hover:bg-white/5"
-                                            }`}
-                                        >
-                                            {f !== "all" && getSourceIcon(f, "w-4 h-4")}
-                                            {f}
-                                        </button>
-                                    ))}
+                                        {["all", "mock", "custom", "resume"].map((f) => (
+                                            <button
+                                                key={f}
+                                                onClick={() => setFilter(f)}
+                                                className={`px-3 sm:px-5 py-1.5 sm:py-2 md:py-2.5 rounded-lg sm:rounded-xl text-xs md:text-sm font-semibold transition-all flex items-center gap-1.5 sm:gap-2 capitalize whitespace-nowrap ${filter === f
+                                                        ? "bg-gradient-to-r from-[#6C63FF] to-[#5B53EE] text-white shadow-lg shadow-[#6C63FF]/25"
+                                                        : "bg-transparent text-[#8B89A0] hover:text-white hover:bg-white/5"
+                                                    }`}
+                                            >
+                                                {f !== "all" && getSourceIcon(f, "w-4 h-4")}
+                                                {f}
+                                            </button>
+                                        ))}
                                     </div>
                                 </div>
                             )}
@@ -256,7 +248,7 @@ const MyInterviewsPage = () => {
                                                     ))}
                                                 </div>
                                             )}
-                                            
+
                                             {/* Explore Prompt */}
                                             <div className="absolute top-1/2 right-4 -translate-y-1/2 opacity-0 -translate-x-4 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 hidden md:flex items-center justify-center w-8 h-8 rounded-full bg-[#6C63FF] shadow-lg shadow-[#6C63FF]/30">
                                                 <FiChevronRight className="w-5 h-5 text-white" />

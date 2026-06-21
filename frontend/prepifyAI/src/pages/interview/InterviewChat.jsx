@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect  } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../../services/api";
 import aiAvatar from "../../assets/robot2.png";
@@ -139,7 +139,7 @@ const InterviewChat = () => {
                 // Play Deepgram Aura audio if backend returned it, else fallback
                 playAudio(res.data.audio, res.data.firstMessage);
             }
-        } catch (err) {
+        } catch {
             const msg = err?.response?.data?.message || err?.message || "Failed to start session.";
             setError(`[${err?.response?.status || "ERR"}] ${msg}`);
         } finally {
@@ -204,7 +204,7 @@ const InterviewChat = () => {
 
                 recorder.start();
                 setIsRecording(true);
-            } catch (err) {
+            } catch {
                 setError("Microphone access denied. Please allow mic permissions.");
             }
         }
@@ -273,7 +273,7 @@ const InterviewChat = () => {
                                 } else if (data.type === "error") {
                                     throw new Error(data.message);
                                 }
-                            } catch (e) {
+                            } catch {
                                 // ignore parse error for incomplete JSON chunk
                             }
                         }
@@ -288,7 +288,7 @@ const InterviewChat = () => {
             playAudio(audioBase64, cleanReply);
 
             if (isComplete) setTimeout(() => endSession(), 3000);
-        } catch (err) {
+        } catch {
             const msg = err.message || "Voice message failed.";
             setError(`[ERR] ${msg}`);
             setIsLoading(false);
@@ -304,7 +304,7 @@ const InterviewChat = () => {
             setIsLoading(true);
             await api.patch(`/sessions/${sessionId}/end`);
             navigate(`/interview/${sessionId}/analysis`);
-        } catch (err) {
+        } catch {
             setError("Failed to end session.");
         } finally {
             setIsLoading(false);

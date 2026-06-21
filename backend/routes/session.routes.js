@@ -6,7 +6,6 @@ import {
     addMessageToSession,
     endSession,
     voiceMessageToSession,
-    testVoiceMessage,
     getSessionAnalysis, getMySessions
 } from "../controllers/session.controller.js";
 
@@ -31,19 +30,6 @@ sessionRouter.post("/:id/message", addMessageToSession);
 // PATCH /api/sessions/:id/end
 sessionRouter.patch("/:id/end", endSession);
 
-// GET /api/sessions/test-tts-direct
-sessionRouter.get("/test-tts-direct", async (req, res) => {
-    try {
-        const audio = await textToSpeech("Hello! Can you hear me? This is a voice test.");
-        res.json({
-            audio,
-            audioIsNull: audio === null,
-            audioLength: audio?.length,
-        });
-    } catch (err) {
-        res.json({ error: err.message, stack: err.stack });
-    }
-});
 
 // POST /api/sessions/:id/voice-message
 sessionRouter.post(
@@ -52,7 +38,5 @@ sessionRouter.post(
     voiceMessageToSession
 );
 
-// POST /api/sessions/:id/voice-message-test
-sessionRouter.post("/:id/voice-message-test", testVoiceMessage);
 
 export default sessionRouter;

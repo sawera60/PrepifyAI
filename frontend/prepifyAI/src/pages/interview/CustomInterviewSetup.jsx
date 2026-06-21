@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect  } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
 import aiAvatar from "../../assets/robot2.png";
@@ -11,7 +11,7 @@ const CustomInterviewSetup = () => {
   const [isListening, setIsListening] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
-  const [statusText, setStatusText] = useState("Tap and hold to speak");
+  
   const [error, setError] = useState("");
   const [turnCount, setTurnCount] = useState(0);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -97,7 +97,7 @@ const CustomInterviewSetup = () => {
         const { reply, audio } = res.data;
         setConversationHistory([{ role: "assistant", content: reply }]);
         playAudio(audio, reply);
-      } catch (err) {
+      } catch {
         const fallback = "Hi! I'm your PrepifyAI assistant. What role are you preparing for?";
         setConversationHistory([{ role: "assistant", content: fallback }]);
         speakFallback(fallback);
@@ -121,7 +121,7 @@ const CustomInterviewSetup = () => {
         streamRef.current?.getTracks().forEach((t) => t.stop());
         setIsListening(false);
         setIsProcessing(true);
-        setStatusText("Processing...");
+        
       }
     } else {
       // ── START ──
@@ -156,8 +156,8 @@ const CustomInterviewSetup = () => {
 
         mediaRecorder.start();
         setIsListening(true);
-        setStatusText("Listening...");
-      } catch (err) {
+        
+      } catch {
         setError("Microphone access denied. Please allow mic permissions.");
       }
     }
@@ -171,7 +171,7 @@ const CustomInterviewSetup = () => {
       const audioBlob = new Blob(audioChunksRef.current, { type: blobType });
 
       if (audioBlob.size < 100) {
-        setStatusText("Too short — please hold and speak clearly");
+        
         setIsProcessing(false);
         return;
       }
@@ -189,13 +189,13 @@ const CustomInterviewSetup = () => {
         console.error("Transcription error:", msg);
         setError(`Transcription error: ${msg}`);
         setIsProcessing(false);
-        setStatusText("Tap and hold to speak");
+        
         return;
       }
 
       const transcript = transcriptRes.data.transcript;
       if (!transcript?.trim()) {
-        setStatusText("Didn't catch that — try again");
+        
         setIsProcessing(false);
         return;
       }
@@ -208,12 +208,12 @@ const CustomInterviewSetup = () => {
 
       // Ask AI for next question / completion
       await getAIResponse(updatedHistory);
-    } catch (err) {
+    } catch {
       const errMsg = err?.response?.data?.message || err?.message || "Unknown error";
       console.error("handleAudioReady error:", err);
       setError(`Error: ${errMsg}`);
       setIsProcessing(false);
-      setStatusText("Tap and hold to speak");
+      
     }
   };
 
@@ -229,18 +229,18 @@ const CustomInterviewSetup = () => {
       if (done && interviewData) {
         playAudio(audio, reply, async () => {
           setIsCreating(true);
-          setStatusText("Creating your interview...");
+          
           await createInterview(interviewData);
         });
       } else {
         playAudio(audio, reply);
         setIsProcessing(false);
-        setStatusText("Tap and hold to speak");
+        
       }
-    } catch (err) {
+    } catch {
       setError("AI response failed. Please try again.");
       setIsProcessing(false);
-      setStatusText("Tap and hold to speak");
+      
     }
   };
 
@@ -255,10 +255,10 @@ const CustomInterviewSetup = () => {
         techStack: Array.isArray(data.techStack) ? data.techStack : [data.techStack],
       });
       setTimeout(() => navigate("/dashboard"), 1500);
-    } catch (err) {
+    } catch {
       setError("Failed to create interview. Please try again.");
       setIsCreating(false);
-      setStatusText("Tap and hold to speak");
+      
     }
   };
 

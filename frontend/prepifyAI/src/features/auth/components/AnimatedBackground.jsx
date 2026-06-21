@@ -1,4 +1,3 @@
-import React from "react";
 import { FaMicrophoneAlt, FaRobot, FaCheckCircle, FaBrain, FaWaveSquare } from "react-icons/fa";
 
 const AnimatedBackground = () => {

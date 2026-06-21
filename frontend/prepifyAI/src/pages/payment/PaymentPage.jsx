@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import Sidebar from "../../features/dashboard/components/Sidebar";
@@ -127,7 +126,7 @@ const StripePaymentForm = ({ onClose, onSuccess }) => {
                     onSuccess();
                 }, 2500);
             }
-        } catch (err) {
+        } catch {
             const msg = err?.response?.data?.error || err?.message || "Payment failed. Please try again.";
             setErrorMsg(msg);
             setStep("failed");
@@ -234,11 +233,10 @@ const StripePaymentForm = ({ onClose, onSuccess }) => {
                         <button
                             onClick={handlePay}
                             disabled={!stripe || !cardComplete}
-                            className={`w-full font-semibold rounded-xl py-3 text-sm transition-all duration-200 flex items-center justify-center gap-2 ${
-                                !stripe || !cardComplete
+                            className={`w-full font-semibold rounded-xl py-3 text-sm transition-all duration-200 flex items-center justify-center gap-2 ${!stripe || !cardComplete
                                     ? "bg-[#6C63FF]/30 text-white/50 cursor-not-allowed"
                                     : "bg-gradient-to-r from-[#6C63FF] to-[#5B53EE] hover:from-[#5B53EE] hover:to-[#4B44DD] text-white shadow-lg shadow-[#6C63FF]/25"
-                            }`}
+                                }`}
                         >
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                                 <rect x="1" y="4" width="22" height="16" rx="2" />
@@ -297,10 +295,10 @@ const StripePaymentForm = ({ onClose, onSuccess }) => {
                         </div>
                         <div className="flex gap-2 mt-2">
                             {[
-                                <svg key="mic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>,
-                                <svg key="doc" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>,
-                                <svg key="chart" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>,
-                                <svg key="bolt" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
+                                <svg key="mic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z" /><path d="M19 10v2a7 7 0 0 1-14 0v-2" /><line x1="12" y1="19" x2="12" y2="22" /></svg>,
+                                <svg key="doc" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>,
+                                <svg key="chart" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="20" x2="18" y2="10" /><line x1="12" y1="20" x2="12" y2="4" /><line x1="6" y1="20" x2="6" y2="14" /></svg>,
+                                <svg key="bolt" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" /></svg>,
                             ].map((icon, i) => (
                                 <span
                                     key={i}
@@ -363,7 +361,6 @@ const PaymentModal = ({ onClose, onSuccess }) => {
 
 // ─── Main Payment Page ────────────────────────────────────────────────────────
 const PaymentPage = () => {
-    const navigate = useNavigate();
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [currentPlan, setCurrentPlan] = useState("free"); // "free" | "pro"
@@ -378,7 +375,7 @@ const PaymentPage = () => {
             try {
                 const res = await api.get("/users/profile");
                 setCurrentPlan(res.data.user.plan || "free");
-            } catch (err) {
+            } catch {
                 console.error("Failed to fetch plan:", err);
                 setCurrentPlan("free");
             } finally {
@@ -393,7 +390,7 @@ const PaymentPage = () => {
         try {
             const res = await api.get("/users/profile");
             setCurrentPlan(res.data.user.plan || "free");
-        } catch (err) {
+        } catch {
             // Payment succeeded but profile fetch failed — set pro optimistically
             setCurrentPlan("pro");
         }

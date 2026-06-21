@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import useUserStore from "../../store/userStore";
 import logo from "../../../assets/logo.png";
@@ -183,9 +183,8 @@ const Sidebar = ({ mobileOpen, onClose }) => {
 
             {/* Mobile Drawer */}
             <aside
-                className={`font-dm w-[264px] min-h-screen bg-[#13151F] border-r border-white/[0.06] flex flex-col fixed left-0 top-0 z-50 lg:hidden transition-transform duration-300 ${
-                    mobileOpen ? "translate-x-0" : "-translate-x-full"
-                }`}
+                className={`font-dm w-[264px] min-h-screen bg-[#13151F] border-r border-white/[0.06] flex flex-col fixed left-0 top-0 z-50 lg:hidden transition-transform duration-300 ${mobileOpen ? "translate-x-0" : "-translate-x-full"
+                    }`}
             >
                 {navContent}
             </aside>
